@@ -1133,10 +1133,10 @@ class ApiServices {
         )
       ];
 
-      // Create FormData with an array of files
-      FormData formData = FormData.fromMap({
-        "images": multiPartList,
-      });
+      FormData formData = FormData();
+      for (var file in multiPartList) {
+        formData.files.add(MapEntry("images", file));
+      }
 
       debugPrint('FormData: ${formData.fields}');
       debugPrint('FormData files: ${formData.files}');
