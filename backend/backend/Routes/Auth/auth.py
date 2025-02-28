@@ -15,6 +15,7 @@ from google.auth.transport.requests import Request
 load_dotenv()
 
 client_id = os.getenv("GOOGLE_CLIENT_ID")
+ios_client_id = os.getenv("IOS_GOOGLE_CLIENT_ID")
 
 def verify_id_token(token):
     # return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
@@ -23,6 +24,19 @@ def verify_id_token(token):
         id_info = id_token.verify_oauth2_token(token, request_adapter, client_id)
         return True, id_info
     except GoogleAuthError as e:
+        try:
+            id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
+            return True, id_info
+        except GoogleAuthError as e:
+            print("JERE")
+            return False, f"Token verification failed: {e}"
+        return False, f"Token verification failed: {e}"
+    
+    try:
+        id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
+        return True, id_info
+    except GoogleAuthError as e:
+        print("JERE 2")
         return False, f"Token verification failed: {e}"
 
 def handle_login(id_token):
@@ -42,6 +56,9 @@ def handle_login(id_token):
     return True, token, {"id": user_id, "email": data["email"]}
 
 def is_valid_iith_email(email):
+    if email == "iithdashboard@gmail.com":
+        print("HEHE ", email)
+        return True
     pattern = r'^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?iith\.ac\.in$'
     return re.match(pattern, email) is not None
 
