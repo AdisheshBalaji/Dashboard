@@ -196,7 +196,9 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Transform.rotate(
-                      angle: -pi/2,
+                      angle: _cameraController!.description.lensDirection == CameraLensDirection.front
+                      ? -pi / 2
+                      : pi / 2,
                       child: AspectRatio(
                         aspectRatio: 1 / _cameraController!.value.aspectRatio,
                         child: CameraPreview(_cameraController!),
