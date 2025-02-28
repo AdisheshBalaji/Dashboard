@@ -3,6 +3,7 @@ package helpers
 import (
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -21,6 +22,7 @@ func SetCookie(w http.ResponseWriter, key string, value string, daysExpire int) 
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 		MaxAge:   daysExpire * 24 * 60 * 60, // seconds
+		Domain: os.Getenv("COOKIE_DOMAIN"),
 	})
 }
 
