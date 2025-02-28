@@ -17,7 +17,7 @@ from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
 from Routes.Transport.qr import router as transaction_verification_route
-from Routes.face import router as face_router
+from Routes.Face.face import router as face_router
 
 
 load_dotenv()

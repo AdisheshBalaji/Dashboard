@@ -7,6 +7,8 @@ import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'package:http/http.dart' as http;
 import 'package:async/async.dart';
 import 'dart:convert';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class FaceUploadScreen extends StatefulWidget {
   @override
@@ -15,7 +17,6 @@ class FaceUploadScreen extends StatefulWidget {
 
 class _FaceUploadScreenState extends State<FaceUploadScreen> {
   CameraController? _cameraController;
-  bool _isCameraOpen = false;
   XFile? _capturedImage;
   List<CameraDescription>? _cameras;
   int _selectedCameraIndex = 0;
@@ -23,20 +24,51 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
     options: FaceDetectorOptions(enableContours: false, enableLandmarks: false),
   );
   bool _isFaceDetected = false;
+  bool _isCameraPermissionGranted = false;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera();
+    _requestCameraPermission();
+  }
+
+  Future<void> _requestCameraPermission() async {
+    final status = await Permission.camera.request();
+    setState(() {
+      _isCameraPermissionGranted = status.isGranted;
+    });
+    
+    if (status.isGranted) {
+      _initializeCamera();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Camera permission is required to use this feature")),
+      );
+    }
   }
 
   void _initializeCamera() async {
-    _cameras = await availableCameras();
-    if (_cameras != null && _cameras!.isNotEmpty) {
-      _cameraController =
-          CameraController(_cameras![_selectedCameraIndex], ResolutionPreset.medium);
-      await _cameraController!.initialize();
-      setState(() {});
+    try {
+      _cameras = await availableCameras();
+      if (_cameras != null && _cameras!.isNotEmpty) {
+        _cameraController =
+            CameraController(_cameras![_selectedCameraIndex], ResolutionPreset.medium);
+        await _cameraController!.initialize();
+        await _cameraController!.lockCaptureOrientation(DeviceOrientation.portraitUp);
+        
+        if (mounted) {
+          setState(() {});
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("No cameras found on device")),
+        );
+      }
+    } catch (e) {
+      print("Camera initialization error: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to initialize camera: $e")),
+      );
     }
   }
 
@@ -109,38 +141,47 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
     return Scaffold(
       appBar: AppBar(title: Text('Take a Selfie')),
       body: Center(
-        child: Column(
+        child: !_isCameraPermissionGranted 
+        ? Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text("Camera permission is required"),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _requestCameraPermission,
+                child: Text('Grant Permission'),
+              ),
+            ],
+          )
+        : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    if (_capturedImage != null) {
+            if (_capturedImage != null)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
                       setState(() {
                         _capturedImage = null;
                         _isFaceDetected = false;
                         _initializeCamera();
                       });
-                    } else {
-                      setState(() {
-                        _isCameraOpen = !_isCameraOpen;
-                      });
-                    }
-                  },
-                  child: Text(_capturedImage != null
-                      ? 'Take Again'
-                      : (_isCameraOpen ? 'Close Camera' : 'Take Photo')),
-                ),
-                SizedBox(width: 10),
-                if (_isCameraOpen && _capturedImage == null)
+                    },
+                    child: Text('Take Again'),
+                  ),
+                ],
+              ),
+            if (_capturedImage == null && _cameras != null && _cameras!.length > 1)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
                   IconButton(
                     icon: Icon(Icons.switch_camera, size: 30),
                     onPressed: _switchCamera,
                   ),
-              ],
-            ),
+                ],
+              ),
             SizedBox(height: 10),
             Container(
               decoration: BoxDecoration(
@@ -150,43 +191,46 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
               width: 300,
               height: 300,
               child: _capturedImage == null
-                  ? (_isCameraOpen &&
-                  _cameraController != null &&
-                  _cameraController!.value.isInitialized
-                  ? ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: CameraPreview(_cameraController!),
-              )
-                  : Container())
-                  : ClipRRect(
-                borderRadius: BorderRadius.circular(15),
-                child: Image.file(File(_capturedImage!.path),
-                    fit: BoxFit.cover),
-              ),
+              ? (_cameraController != null &&
+                _cameraController!.value.isInitialized
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: Transform.rotate(
+                      angle: _cameraController!.description.lensDirection == CameraLensDirection.front
+                      ? -pi / 2
+                      : pi / 2,
+                      child: AspectRatio(
+                        aspectRatio: 1 / _cameraController!.value.aspectRatio,
+                        child: CameraPreview(_cameraController!),
+                      ),
+                    ),
+                  )
+                : Center(child: CircularProgressIndicator()))
+              : ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Image.file(File(_capturedImage!.path),
+                      fit: BoxFit.cover),
+                ),
             ),
-            if (_isCameraOpen && _capturedImage == null)
-              Column(
-                children: [
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _capturePhoto,
-                    child: Text('Capture'),
-                  ),
-                ],
+            SizedBox(height: 10),
+            if (_capturedImage == null)
+              ElevatedButton(
+                onPressed: _capturePhoto,
+                child: Text('Capture'),
               ),
             if (_capturedImage != null)
               Column(
                 children: [
                   SizedBox(height: 10),
                   _isFaceDetected
-                      ? ElevatedButton(
-                    onPressed: _uploadPhoto,
-                    child: Text('Upload'),
-                  )
-                      : Text(
-                    "No face detected. Retake the photo!",
-                    style: TextStyle(color: Colors.red),
-                  ),
+                  ? ElevatedButton(
+                      onPressed: _uploadPhoto,
+                      child: Text('Upload'),
+                    )
+                  : Text(
+                      "No face detected. Retake the photo!",
+                      style: TextStyle(color: Colors.red),
+                    ),
                 ],
               ),
           ],
