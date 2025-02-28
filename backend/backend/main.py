@@ -17,8 +17,9 @@ from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
 from Routes.Transport.qr import router as transaction_verification_route
-from Routes.Face.face import router as face_router
-
+from Routes.notif import send_notifications_to_all_users
+from typing import Optional
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -29,7 +30,9 @@ domains = os.getenv("ALLOWED_DOMAINS", "").split(",")
 # TODO: change for prod
 origins = [
     "http://localhost:5500",
+    "http://localhost:5000",
     "http://localhost:8080",
+    "http://localhost:34261"
 ] + domains
 
 app.add_middleware(
@@ -50,7 +53,6 @@ app.include_router(cab_router)
 app.include_router(user_router)
 app.include_router(transport_router)
 app.include_router(transaction_verification_route)
-app.include_router(face_router)
 
 async def cookie_verification_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
@@ -73,7 +75,7 @@ async def cookie_verification_middleware(request: Request, call_next):
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/transport/qr", "/transport/qr/scan", "/transport/cityBus","/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/mess_menu/"]  # Add routes to exclude guard here
+    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/transport/cityBus", "/mess_menu/"]  # Add routes to exclude guard here
 
     if request.url.path not in excluded_routes:
         return await cookie_verification_middleware(request, call_next)
@@ -136,3 +138,17 @@ async def get_main_gate_status(user_id: int = Depends(get_user_id)):
         else:
             return response_data, 200
 
+
+class NotificationRequest(BaseModel):
+    title: str
+    body: str
+    image_url: Optional[str] = None
+    test: Optional[bool] = True
+
+@app.post("/send-notifications")
+async def send_notifications(payload: NotificationRequest, user_id: int = Depends(get_user_id)):
+    if user_id not in {1, 41}:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    send_notifications_to_all_users(payload.title, payload.body, payload.image_url, test=payload.test)
+    return {"message": "Notifications sent"}
