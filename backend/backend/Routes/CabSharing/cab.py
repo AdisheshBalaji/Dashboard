@@ -255,5 +255,6 @@ def send_email(
 
 
     # send email in a separate thread so that the user doesn't have to wait
-    threading.Thread(target=send_notification, args=(subject,)).start()
+    if mail_type == "accept" or mail_type == "reject" or mail_type == "exit_notif" or mail_type == "delete_notif" or mail_type == "request":
+        threading.Thread(target=send_notification, args=(subject,)).start()
     threading.Thread(target=_send, args=(message,)).start()
