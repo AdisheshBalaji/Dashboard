@@ -6,14 +6,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Literal
 
-from backend.backend.Routes.notif import send_fcm_cab_notifications
+from Routes.notif import send_fcm_cab_notifications
 import html2text
 from dotenv import load_dotenv
 from fastapi import  HTTPException
 from pytz import timezone
 from uvicorn.workers import UvicornWorker
 from Routes.User.user import get_fcm_tokens_by_email
-from firebase_admin import credentials, messaging
 
 from utils import conn, queries
 
