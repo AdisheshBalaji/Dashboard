@@ -248,7 +248,7 @@ def send_email(
     def send_notification(description):
         title = "Cab Sharing Alert!"
         description = description.replace("[Cab Sharing] ", "")
-        description = description + "\nOpen the app to view the details."
+        description = description + "Open the app to view the details."
         fcm_tokens = get_fcm_tokens_by_email(receiver)
         for token in fcm_tokens:
             send_fcm_cab_notifications(token, title, description)
