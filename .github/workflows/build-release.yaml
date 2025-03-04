@@ -19,6 +19,11 @@ jobs:
           flutter-version: '3.27.3'
           cache: true
 
+      - name: Create .env File
+        run: |
+          echo "BACKEND_URL=${{ secrets.BACKEND_URL || 'https://api.iith.dev' }}" >> frontend/.env
+        shell: bash
+        
       - name: Install Dependencies
         run: |
           cd frontend
