@@ -62,3 +62,20 @@ def send_notifications_to_all_users(title, body, image_url=None, test=True):
                 future.result()
             except Exception as e:
                 print(f"Error in sending notification: {e}")
+
+
+def send_fcm_cab_notifications(token: str, title: str, description: str):
+    message = messaging.Message(
+        notification=messaging.Notification(
+            title=title,
+            body=description,
+        ),
+        token=token,
+    )
+    try:
+        response = messaging.send(message)
+        print(f"Successfully sent message: {title}")
+        return response
+    except Exception as e:
+        print(f"Error sending FCM notification: {e}, {title}")
+        return None
