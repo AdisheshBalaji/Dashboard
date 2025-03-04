@@ -29,8 +29,7 @@ class AppRouter {
   static AppRouter? _instance;
 
   factory AppRouter({required Function(int) onThemeChanged}) {
-    _instance ??= AppRouter._internal(onThemeChanged: onThemeChanged);
-    return _instance!;
+    return _instance ??= AppRouter._internal(onThemeChanged: onThemeChanged);
   }
 
   AppRouter._internal({required this.onThemeChanged});

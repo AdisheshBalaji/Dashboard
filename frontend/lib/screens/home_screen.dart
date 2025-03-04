@@ -322,6 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+    fetchTimetable();
     getMainGateStatus();
   }
 
