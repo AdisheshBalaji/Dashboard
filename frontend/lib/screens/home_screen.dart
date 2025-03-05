@@ -632,7 +632,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         title: 'Cab Sharing',
                                         child:
-                                            'assets/icons/cab-sharing-icon.svg',
+                                            'assets/icons/cabsharing.svg',
                                         onTap: () {
                                           widget.isGuest
                                               ? showError()
@@ -669,7 +669,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         reduceImageSize: true,
                                         title: 'Lost & Found',
                                         child:
-                                            'assets/icons/magnifying-icon.svg',
+                                            'assets/icons/lostfound.svg',
                                         onTap: widget.isGuest
                                             ? showError
                                             : () => context.push('/lnf',
@@ -700,7 +700,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Bus Shuttle',
-                                        child: 'assets/icons/bus-svg.svg',
+                                        child: 'assets/icons/city-bus.svg',
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
@@ -728,7 +728,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Face',
-                                        child: 'assets/icons/bus-svg.svg',
+                                        child: 'assets/icons/face-scan.svg',
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
@@ -756,7 +756,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Merch',
-                                        child: 'assets/icons/bus-svg.svg',
+                                        child: 'assets/icons/merch.svg',
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
@@ -784,7 +784,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'IITH Community',
-                                        child: 'assets/icons/bus-svg.svg',
+                                        child: 'assets/icons/community.svg',
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
