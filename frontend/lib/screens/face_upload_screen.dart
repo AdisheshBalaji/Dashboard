@@ -52,7 +52,7 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
       _cameras = await availableCameras();
       if (_cameras != null && _cameras!.isNotEmpty) {
         _cameraController =
-            CameraController(_cameras![_selectedCameraIndex], ResolutionPreset.medium);
+            CameraController(_cameras![_selectedCameraIndex], ResolutionPreset.medium, enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
         await _cameraController!.initialize();
         await _cameraController!.lockCaptureOrientation(DeviceOrientation.portraitUp);
         
@@ -99,6 +99,20 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
         SnackBar(content: Text("Camera not initialized!")),
       );
     }
+  }
+
+  Widget _buildCameraPreview() {
+    int quarterTurns = 0;
+    if (_cameras != null && _cameras!.isNotEmpty) {
+      quarterTurns = _cameras![_selectedCameraIndex].sensorOrientation ~/ 90;
+    }
+    return RotatedBox(
+      quarterTurns: quarterTurns,
+      child: AspectRatio(
+        aspectRatio: _cameraController!.value.aspectRatio,
+        child: CameraPreview(_cameraController!),
+      ),
+    );
   }
 
   Future<void> _detectFaces(XFile image) async {
@@ -189,28 +203,18 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
                 border: Border.all(color: Colors.grey, width: 2),
               ),
               width: 300,
-              height: 300,
+              height: 400,
               child: _capturedImage == null
-              ? (_cameraController != null &&
-                _cameraController!.value.isInitialized
-                ? ClipRRect(
+                ? (_cameraController != null && _cameraController!.value.isInitialized
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      child: _buildCameraPreview(),
+                    )
+                  : Center(child: CircularProgressIndicator()))
+                : ClipRRect(
                     borderRadius: BorderRadius.circular(15),
-                    child: Transform.rotate(
-                      angle: _cameraController!.description.lensDirection == CameraLensDirection.front
-                      ? -pi / 2
-                      : pi / 2,
-                      child: AspectRatio(
-                        aspectRatio: 1 / _cameraController!.value.aspectRatio,
-                        child: CameraPreview(_cameraController!),
-                      ),
-                    ),
-                  )
-                : Center(child: CircularProgressIndicator()))
-              : ClipRRect(
-                  borderRadius: BorderRadius.circular(15),
-                  child: Image.file(File(_capturedImage!.path),
-                      fit: BoxFit.cover),
-                ),
+                    child: Image.file(File(_capturedImage!.path), fit: BoxFit.cover),
+                  ),
             ),
             SizedBox(height: 10),
             if (_capturedImage == null)
