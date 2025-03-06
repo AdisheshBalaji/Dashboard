@@ -109,7 +109,7 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
     return RotatedBox(
       quarterTurns: quarterTurns,
       child: AspectRatio(
-        aspectRatio: _cameraController!.value.aspectRatio,
+        aspectRatio: 1 / _cameraController!.value.aspectRatio,
         child: CameraPreview(_cameraController!),
       ),
     );
