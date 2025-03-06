@@ -101,20 +101,6 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
     }
   }
 
-  Widget _buildCameraPreview() {
-    int quarterTurns = 0;
-    if (_cameras != null && _cameras!.isNotEmpty) {
-      quarterTurns = _cameras![_selectedCameraIndex].sensorOrientation ~/ 90;
-    }
-    return RotatedBox(
-      quarterTurns: quarterTurns,
-      child: AspectRatio(
-        aspectRatio: 1 / _cameraController!.value.aspectRatio,
-        child: CameraPreview(_cameraController!),
-      ),
-    );
-  }
-
   Future<void> _detectFaces(XFile image) async {
     final inputImage = InputImage.fromFilePath(image.path);
     final List<Face> faces = await _faceDetector.processImage(inputImage);
@@ -206,11 +192,14 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
               height: 400,
               child: _capturedImage == null
                 ? (_cameraController != null && _cameraController!.value.isInitialized
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(15),
-                      child: _buildCameraPreview(),
-                    )
-                  : Center(child: CircularProgressIndicator()))
+                    ? AspectRatio(
+                        aspectRatio: _cameraController!.value.aspectRatio,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(15),
+                          child: CameraPreview(_cameraController!),
+                        ),
+                      )
+                    : Center(child: CircularProgressIndicator()))
                 : ClipRRect(
                     borderRadius: BorderRadius.circular(15),
                     child: Image.file(File(_capturedImage!.path), fit: BoxFit.cover),
