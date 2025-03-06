@@ -23,6 +23,7 @@ void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
+    name:"Dashboard",
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
