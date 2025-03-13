@@ -29,6 +29,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:text_scroll/text_scroll.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
   final bool isGuest;
@@ -299,6 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fetchTimetable();
     setUpFirebaseMessaging();
     analyticsService.logScreenView(screenName: "HomeScreen");
+    // Initialize the controller properly
   }
 
   Future<void> _refresh() async {
@@ -312,6 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     fetchMessMenu();
     fetchBus();
+    fetchTimetable();
     getMainGateStatus();
   }
 
@@ -565,6 +568,222 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                           ),
                           const SizedBox(height: 15),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.grey[900] // Dark mode background
+                                  : Colors.grey[200], // Light mode background
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: EdgeInsets.fromLTRB(12.0, 8.0, 1.0, 8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Services',
+                                  style: GoogleFonts.inter(
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 28,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                Wrap(
+                                  spacing:
+                                      10.0, // Horizontal spacing between cards
+                                  runSpacing:
+                                      10.0, // Vertical spacing between rows
+                                  children: [
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28, // Half of the screen width minus spacing
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        title: 'Cab Sharing',
+                                        child:
+                                            'assets/icons/cabsharing.svg',
+                                        onTap: () {
+                                          widget.isGuest
+                                              ? showError()
+                                              : context
+                                                  .push('/cabsharing', extra: {
+                                                  'user': userModel ??
+                                                      UserModel(
+                                                          email:
+                                                              "user@iith.ac.in",
+                                                          name: "User"),
+                                                  'image': image,
+                                                });
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Lost & Found',
+                                        child:
+                                            'assets/icons/lostfound.svg',
+                                        onTap: widget.isGuest
+                                            ? showError
+                                            : () => context.push('/lnf',
+                                                    extra: {
+                                                      'currentUserEmail':
+                                                          userModel?.email ??
+                                                              'user@iith.ac.in'
+                                                    }),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Bus Shuttle',
+                                        child: 'assets/icons/city-bus.svg',
+                                        onTap: () {
+                                          // widget.isGuest
+                                          //     ? showError()
+                                          context.push('/city_bus');
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Face',
+                                        child: 'assets/icons/face-scan.svg',
+                                        onTap: () {
+                                          // widget.isGuest
+                                          //     ? showError()
+                                          context.push('/face_upload');
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Merch',
+                                        child: 'assets/icons/merch.svg',
+                                        onTap: () {
+                                          // widget.isGuest
+                                          //     ? showError()
+                                          context.push('/');
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'IITH Community',
+                                        child: 'assets/icons/community.svg',
+                                        onTap: () {
+                                          // widget.isGuest
+                                          //     ? showError()
+                                          context.push("/community");
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+
                           Wrap(
                             spacing: 10.0, // Horizontal spacing between cards
                             runSpacing: 10.0, // Vertical spacing between rows
@@ -651,38 +870,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                             ],
-                          ),
+													),
                           const SizedBox(height: 20),
-                          // HomeCardNoOptions(
-                          //   isComingSoon: true,
-                          //   title: 'Cab Sharing',
-                          //   child: 'assets/icons/cab-sharing-icon.svg',
-                          //   onTap: () {
-                          //     widget.isGuest
-                          //         ? showError()
-                          //         : context.push('/cabsharing', extra: {
-                          //             'user': userModel ??
-                          //                 UserModel(
-                          //                     email: "user@iith.ac.in",
-                          //                     name: "User"),
-                          //             'image': image,
-                          //           });
-                          //   },
-                          // ),
-                          // const SizedBox(height: 20),
-                          // HomeCardNoOptions(
-                          //   isComingSoon: false,
-                          //   isLnF: true,
-                          //   title: 'Lost & Found',
-                          //   child: 'assets/icons/magnifying-icon.svg',
-                          //   onTap: widget.isGuest
-                          //       ? showError
-                          //       : () => context.push('/lnf', extra: {
-                          //             'currentUserEmail':
-                          //                 userModel?.email ?? 'user@iith.ac.in'
-                          //           }),
-                          // ),
-                          // const SizedBox(height: 20),
                         ],
                       ),
                     ),

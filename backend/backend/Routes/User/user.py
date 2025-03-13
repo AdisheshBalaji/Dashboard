@@ -1,6 +1,6 @@
 # queries/user.py
 
-from typing import Optional, Dict
+from typing import List, Optional, Dict
 from pypika import Table, Query
 from utils import conn 
 
@@ -81,3 +81,15 @@ def upsert_fcm_token(user_id: int, token: str, device_type: str) -> bool:
         conn.rollback()
         print(f"Error upserting FCM token for user_id={user_id}: {e}")
         return False
+    
+def get_fcm_tokens_by_email(email: str) -> List[str]:
+    query = """
+    SELECT token
+    FROM fcm_tokens
+    JOIN users ON fcm_tokens.user_id = users.id
+    WHERE users.email = %s
+    """
+    with conn.cursor() as cursor:
+        cursor.execute(query, (email,))
+        tokens = cursor.fetchall()
+    return [token[0] for token in tokens] if tokens else []

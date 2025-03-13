@@ -1,0 +1,74 @@
+name: Build and Release APK
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+    - 'frontend/**'
+    - '.github/workflows/build-release.yaml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.3'
+          cache: true
+
+      - name: Create .env File
+        run: |
+            echo "BACKEND_URL=${{ secrets.BACKEND_URL || 'https://api.iith.dev' }}" >> frontend/.env
+        shell: bash
+
+      - name: Decode google-services.json
+        run: |
+            echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > frontend/android/app/google-services.json
+
+      - name: Decode release.keystore
+        run: |
+            echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 --decode > frontend/android/app/release.keystore
+
+        
+      - name: Install Dependencies
+        run: |
+          cd frontend
+          flutter pub get
+
+      - name: Build APK
+        run: |
+          cd frontend
+          flutter build apk --release
+
+      - name: Upload APK to Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-apk
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download apk
+        uses: actions/download-artifact@v4
+        with:
+          name: release-apk
+          path: build/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v1.${{ github.run_number }}
+          name: Release v1.${{ github.run_number }}
+          body: "New Android APK release."
+          files: build/app-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

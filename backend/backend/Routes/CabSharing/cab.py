@@ -6,11 +6,13 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Literal
 
+from Routes.notif import send_fcm_cab_notifications
 import html2text
 from dotenv import load_dotenv
 from fastapi import  HTTPException
 from pytz import timezone
 from uvicorn.workers import UvicornWorker
+from Routes.User.user import get_fcm_tokens_by_email
 
 from utils import conn, queries
 
@@ -242,6 +244,17 @@ def send_email(
                 smtp_server.send_message(msg)
         except Exception as ex:
             print("Error sending mail:", ex)
+    
+    def send_notification(description):
+        title = "Cab Sharing Alert!"
+        description = description.replace("[Cab Sharing] ", "")
+        description = description + "Open the app to view the details."
+        fcm_tokens = get_fcm_tokens_by_email(receiver)
+        for token in fcm_tokens:
+            send_fcm_cab_notifications(token, title, description)
+
 
     # send email in a separate thread so that the user doesn't have to wait
+    if mail_type == "accept" or mail_type == "reject" or mail_type == "exit_notif" or mail_type == "delete_notif" or mail_type == "request":
+        threading.Thread(target=send_notification, args=(subject,)).start()
     threading.Thread(target=_send, args=(message,)).start()

@@ -3,7 +3,11 @@ package helpers
 import (
 	"fmt"
 	"net/http"
+	"os"
+	"strconv"
 	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 // setCookie sets a cookie with the given parameters
@@ -18,14 +22,21 @@ func SetCookie(w http.ResponseWriter, key string, value string, daysExpire int) 
 		SameSite: http.SameSiteNoneMode,
 		Path:     "/",
 		MaxAge:   daysExpire * 24 * 60 * 60, // seconds
+		Domain: os.Getenv("COOKIE_DOMAIN"),
 	})
 }
 
-// getUserID retrieves the user ID from the request context
-func GetUserID(r *http.Request) (int, error) {
-	userID, ok := r.Context().Value("user_id").(int)
-	if !ok {
-		return 0, fmt.Errorf("User ID not found")
+// GetUserID retrieves the user ID from the request context
+func GetUserID(c *gin.Context) (int, error) {
+	userIDStr, exists := c.Get("user_id")
+	if !exists {
+		return 0, fmt.Errorf("error: User ID not found in context")
 	}
+
+	userID, err := strconv.Atoi(userIDStr.(string))
+	if err != nil  {
+		return 0, fmt.Errorf("error: User ID is not an integer")
+	}
+
 	return userID, nil
 }

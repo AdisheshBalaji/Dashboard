@@ -17,7 +17,9 @@ from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
 from Routes.Transport.qr import router as transaction_verification_route
-
+from Routes.notif import send_notifications_to_all_users
+from typing import Optional
+from pydantic import BaseModel
 
 load_dotenv()
 
@@ -28,7 +30,9 @@ domains = os.getenv("ALLOWED_DOMAINS", "").split(",")
 # TODO: change for prod
 origins = [
     "http://localhost:5500",
+    "http://localhost:5000",
     "http://localhost:8080",
+    "http://localhost:34261"
 ] + domains
 
 app.add_middleware(
@@ -134,3 +138,17 @@ async def get_main_gate_status(user_id: int = Depends(get_user_id)):
         else:
             return response_data, 200
 
+
+class NotificationRequest(BaseModel):
+    title: str
+    body: str
+    image_url: Optional[str] = None
+    test: Optional[bool] = True
+
+@app.post("/send-notifications")
+async def send_notifications(payload: NotificationRequest, user_id: int = Depends(get_user_id)):
+    if user_id not in {1, 41}:
+        raise HTTPException(status_code=403, detail="Forbidden")
+
+    send_notifications_to_all_users(payload.title, payload.body, payload.image_url, test=payload.test)
+    return {"message": "Notifications sent"}

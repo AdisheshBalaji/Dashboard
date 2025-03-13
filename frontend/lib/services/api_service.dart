@@ -35,6 +35,8 @@ class ApiServices {
   String backendUrl = dotenv.env["BACKEND_URL"] ?? "https://api.iith.dev/";
   // String backendUrl = "https://api.iith.dev/";
 
+  // String backendUrl = "http://10.0.2.2:8000";
+
   Dio dio = Dio();
 
   Future<void> configureDio() async {
@@ -1002,7 +1004,8 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>> submitTransactionID(String transactionId, amount, from, to) async {
+  Future<Map<String, dynamic>> submitTransactionID(
+      String transactionId, amount, from, to) async {
     try {
       // Sending the POST request
       final response = await dio.post(
@@ -1098,6 +1101,60 @@ class ApiServices {
     } catch (e) {
       debugPrint("Failed to fetch recent transaction: $e");
       return null;
+    }
+  }
+
+  Future<bool> bookIghRoom(
+      BuildContext context, Map<String, dynamic> bookingDetails) async {
+    try {
+      final response = await dio.post(
+        '${dotenv.env["ADMIN_BACKEND_URL"]}/igh/book_room',
+        data: bookingDetails,
+      );
+
+      return response.statusCode == 200;
+    } catch (e) {
+      debugPrint(e.toString());
+      return false;
+    }
+  }
+
+  Future<Map<String, dynamic>> uploadPhoto(capturedImage) async {
+    if (!capturedImage.existsSync()) {
+      return {'error': 'Invalid image file'};
+    }
+
+    try {
+      // Create MultipartFile list
+      List<MultipartFile> multiPartList = [
+        await MultipartFile.fromFile(
+          capturedImage!.path,
+          filename: "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
+        )
+      ];
+
+      FormData formData = FormData();
+      for (var file in multiPartList) {
+        formData.files.add(MapEntry("images", file));
+      }
+
+      debugPrint('FormData: ${formData.fields}');
+      debugPrint('FormData files: ${formData.files}');
+
+      final response = await dio.post(
+        '/face/add_face',
+        data: formData,
+        options: Options(headers: {'Content-Type': 'multipart/form-data'}),
+      );
+
+      if (response.statusCode == 200) {
+        return {'status': response.statusCode, 'data': response.data};
+      } else {
+        return {'error': 'Failed to upload: ${response.statusMessage}', 'status': response.statusCode};
+      }
+    } catch (e) {
+      debugPrint("Upload failed: $e");
+      return {'error': 'Request failed: $e'};
     }
   }
 }
