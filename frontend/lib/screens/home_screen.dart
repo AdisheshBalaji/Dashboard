@@ -35,7 +35,11 @@ class HomeScreen extends StatefulWidget {
   final bool isGuest;
   final ValueChanged<int> onThemeChanged;
   final String? code;
-  const HomeScreen({super.key, required this.isGuest, required this.onThemeChanged, this.code});
+  const HomeScreen(
+      {super.key,
+      required this.isGuest,
+      required this.onThemeChanged,
+      this.code});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -65,7 +69,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Timetable? timetable;
 
   void sendTokenToServer(String token, String deviceType) async {
-    final response = await ApiServices().updateFCMToken(context, token, deviceType);
+    final response =
+        await ApiServices().updateFCMToken(context, token, deviceType);
     if (response) {
       debugPrint("FCM Token updated successfully");
       await SharedService().storeToken(token);
@@ -100,7 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _firebaseMessaging.onTokenRefresh.listen((refreshedToken) async {
       String? storedToken = await SharedService().getStoredToken();
       if (refreshedToken != storedToken) {
-        sendTokenToServer(refreshedToken, Platform.isAndroid ? "android" : "ios");
+        sendTokenToServer(
+            refreshedToken, Platform.isAndroid ? "android" : "ios");
       }
     });
   }
@@ -140,7 +146,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void updateAndroidWidget(MessMenuModel messMenu) {
-    HomeWidget.saveWidgetData("widget_mess_menu", jsonEncode(messMenu.toJson()));
+    HomeWidget.saveWidgetData(
+        "widget_mess_menu", jsonEncode(messMenu.toJson()));
     HomeWidget.updateWidget(
       androidName: "MessMenuWidget",
     );
@@ -246,8 +253,9 @@ class _HomeScreenState extends State<HomeScreen> {
       await fetchUser();
       fetchUserProfile();
     } else {
-      UserModel userM =
-          UserModel(email: user['email'] ?? 'user@iith.ac.in', name: user['name'] ?? 'User');
+      UserModel userM = UserModel(
+          email: user['email'] ?? 'user@iith.ac.in',
+          name: user['name'] ?? 'User');
       setState(() {
         userModel = userM;
         image = user['image'] ?? image;
@@ -368,7 +376,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   children: [
                     TextSpan(
-                      text: 'Are you sure you want to accept the timetable with code: ',
+                      text:
+                          'Are you sure you want to accept the timetable with code: ',
                     ),
                     TextSpan(
                       text: code,
@@ -386,7 +395,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Note: This will replace your current timetable, and this action cannot be undone.',
                 style: TextStyle(
-                  color: const Color.fromARGB(255, 255, 210, 100), // Softer warning color
+                  color: const Color.fromARGB(
+                      255, 255, 210, 100), // Softer warning color
                   fontSize: 14,
                   fontStyle: FontStyle.italic,
                 ),
@@ -397,7 +407,9 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () {
                 // Show a friendly cancellation message
-                showError(msg: "You have chosen not to change your timetable. No worries!");
+                showError(
+                    msg:
+                        "You have chosen not to change your timetable. No worries!");
                 Navigator.of(context).pop();
               },
               child: Text(
@@ -408,9 +420,11 @@ class _HomeScreenState extends State<HomeScreen> {
             TextButton(
               onPressed: () async {
                 Navigator.of(context).pop();
-                final response = await ApiServices().getSharedTimetable(context, code);
+                final response =
+                    await ApiServices().getSharedTimetable(context, code);
                 Timetable? sharedTimetable = response[0] as Timetable?;
-                int status = response[1] as int; // Assuming status is in response[1]
+                int status =
+                    response[1] as int; // Assuming status is in response[1]
                 String message = response[2] as String;
                 if (status == 200) {
                   showModalBottomSheet(
@@ -422,7 +436,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           setState(() {
                             timetable = editedTimetable;
                           });
-                          final res = await ApiServices().postTimetable(timetable!);
+                          final res =
+                              await ApiServices().postTimetable(timetable!);
                           if (res['status'] != 200) {
                             showError(msg: "Failed to save timetable.");
                           } else {
@@ -487,7 +502,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: RefreshIndicator(
                       onRefresh: () {
-                        return Future.delayed(const Duration(seconds: 1), _refresh);
+                        return Future.delayed(
+                            const Duration(seconds: 1), _refresh);
                       },
                       child: ListView(
                         children: [
@@ -502,7 +518,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           if (eventText.isNotEmpty)
                             TextScroll(
                               eventText,
-                              velocity: const Velocity(pixelsPerSecond: Offset(50, 0)),
+                              velocity: const Velocity(
+                                  pixelsPerSecond: Offset(50, 0)),
                               delayBefore: const Duration(milliseconds: 900),
                               pauseBetween: const Duration(milliseconds: 100),
                               style: const TextStyle(color: Colors.purple),
@@ -518,19 +535,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                   timetable = editedTimetable;
                                 },
                               );
-                              final res = await ApiServices().postTimetable(timetable!);
+                              final res =
+                                  await ApiServices().postTimetable(timetable!);
                               if (res['status'] != 200) {
                                 showError(msg: "Failed to save timetable.");
                               } else {
                                 showError(msg: "Timetable saved successfully!");
                                 await SharedService().saveTimetable(timetable!);
                                 clearAllNotifications();
-                                EventNotificationService.scheduleWeeklyNotifications(
-                                    timetable: timetable!);
+                                EventNotificationService
+                                    .scheduleWeeklyNotifications(
+                                        timetable: timetable!);
                               }
                             },
-                            onLectureAdded: (courseCode, courseName, lectures, String? classRoom,
-                                String? slot) async {
+                            onLectureAdded: (courseCode, courseName, lectures,
+                                String? classRoom, String? slot) async {
                               if (timetable != null) {
                                 setState(
                                   () {
@@ -539,15 +558,19 @@ class _HomeScreenState extends State<HomeScreen> {
                                         classRoom: classRoom, slot: slot);
                                   },
                                 );
-                                final res = await ApiServices().postTimetable(timetable!);
+                                final res = await ApiServices()
+                                    .postTimetable(timetable!);
                                 if (res['status'] != 200) {
                                   showError(msg: "Failed to save timetable.");
                                 } else {
-                                  showError(msg: "Timetable saved successfully!");
-                                  await SharedService().saveTimetable(timetable!);
+                                  showError(
+                                      msg: "Timetable saved successfully!");
+                                  await SharedService()
+                                      .saveTimetable(timetable!);
                                   clearAllNotifications();
-                                  EventNotificationService.scheduleWeeklyNotifications(
-                                      timetable: timetable!);
+                                  EventNotificationService
+                                      .scheduleWeeklyNotifications(
+                                          timetable: timetable!);
                                 }
                               }
                             },
@@ -558,15 +581,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           const SizedBox(height: 15),
                           HomeScreenMessMenu(messMenu: messMenu, week: week),
-                          const SizedBox(height: 15),
-                          Text(
-                            'Services',
-                            style: GoogleFonts.inter(
-                              color: Theme.of(context).textTheme.bodyLarge?.color,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 28,
-                            ),
-                          ),
                           const SizedBox(height: 15),
                           Container(
                             decoration: BoxDecoration(
@@ -617,8 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     25,
                                         isComingSoon: false,
                                         title: 'Cab Sharing',
-                                        child:
-                                            'assets/icons/cabsharing.svg',
+                                        child: 'assets/icons/cabsharing.svg',
                                         onTap: () {
                                           widget.isGuest
                                               ? showError()
@@ -654,8 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Lost & Found',
-                                        child:
-                                            'assets/icons/lostfound.svg',
+                                        child: 'assets/icons/lostfound.svg',
                                         onTap: widget.isGuest
                                             ? showError
                                             : () => context.push('/lnf',
@@ -783,94 +795,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-
-                          Wrap(
-                            spacing: 10.0, // Horizontal spacing between cards
-                            runSpacing: 10.0, // Vertical spacing between rows
-                            children: [
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width > 450
-                                    ? 200
-                                    : MediaQuery.of(context).size.width / 2 -
-                                        25, // Half of the screen width minus spacing
-                                child: HomeScreenCardSmall(
-                                  width: MediaQuery.of(context).size.width > 450
-                                      ? 200
-                                      : MediaQuery.of(context).size.width / 2 - 25,
-                                  isComingSoon: false,
-                                  title: 'Cab Sharing',
-                                  child: 'assets/icons/cab-sharing-icon.svg',
-                                  onTap: () {
-                                    widget.isGuest
-                                        ? showError()
-                                        : context.push('/cabsharing', extra: {
-                                            'user': userModel ??
-                                                UserModel(email: "user@iith.ac.in", name: "User"),
-                                            'image': image,
-                                          });
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width > 450
-                                    ? 200
-                                    : MediaQuery.of(context).size.width / 2 - 25,
-                                child: HomeScreenCardSmall(
-                                  width: MediaQuery.of(context).size.width > 450
-                                      ? 200
-                                      : MediaQuery.of(context).size.width / 2 - 25,
-                                  isComingSoon: false,
-                                  reduceImageSize: true,
-                                  title: 'Lost & Found',
-                                  child: 'assets/icons/magnifying-icon.svg',
-                                  onTap: widget.isGuest
-                                      ? showError
-                                      : () => context.push('/lnf', extra: {
-                                            'currentUserEmail':
-                                                userModel?.email ?? 'user@iith.ac.in'
-                                          }),
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width > 450
-                                    ? 200
-                                    : MediaQuery.of(context).size.width / 2 - 25,
-                                child: HomeScreenCardSmall(
-                                  width: MediaQuery.of(context).size.width > 450
-                                      ? 200
-                                      : MediaQuery.of(context).size.width / 2 - 25,
-                                  isComingSoon: false,
-                                  reduceImageSize: true,
-                                  title: 'Bus Shuttle',
-                                  child: 'assets/icons/bus-svg.svg',
-                                  onTap: () {
-                                    // widget.isGuest
-                                    //     ? showError()
-                                    context.push('/city_bus');
-                                  },
-                                ),
-                              ),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width > 450
-                                    ? 200
-                                    : MediaQuery.of(context).size.width / 2 - 25,
-                                child: HomeScreenCardSmall(
-                                  width: MediaQuery.of(context).size.width > 450
-                                      ? 200
-                                      : MediaQuery.of(context).size.width / 2 - 25,
-                                  isComingSoon: false,
-                                  reduceImageSize: true,
-                                  title: 'Announcements',
-                                  child: 'assets/icons/bus-svg.svg',
-                                  onTap: () {
-                                    // widget.isGuest
-                                    //     ? showError()
-                                    context.push('/announcements');
-                                  },
-                                ),
-                              ),
-                            ],
-													),
                           const SizedBox(height: 20),
                         ],
                       ),
