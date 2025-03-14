@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dashbaord/extensions.dart';
+import 'package:dashbaord/utils/svg_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/user_model.dart';
 import 'package:go_router/go_router.dart';
@@ -87,55 +88,89 @@ class HomeScreenAppBar extends StatelessWidget {
                       child: const Icon(Icons.logout_rounded),
                     ),
                   )
-                : InkWell(
-                    borderRadius: BorderRadius.circular(100),
-                    onTap: () {
-                      // Navigator.of(context).push(CustomPageRoute(
-                      //   child: ProfileScreen(
-                      //     user: user ??
-                      //         UserModel(
-                      //             email: "xx11btech110xx@iith.ac.in", name: "User"),
-                      //     image: image,
-                      //     onThemeChanged: onThemeChanged,
-                      //   ),
-                      // ));
-                      context.push('/me', extra: {
-                        'user': user ??
-                            UserModel(
-                                email: "xx11btech110xx@iith.ac.in",
-                                name: "User"),
-                        'image': image,
-                        'onThemeChanged': onThemeChanged,
-                      });
-                    },
-                    child: Stack(
-                      children: [
-                        ClipOval(
-                          child: CircleAvatar(
-                              radius: 24,
-                              child: CachedNetworkImage(imageUrl: image)),
-                        ),
-                        if (status != -1)
-                          Positioned(
-                            top: 0,
-                            right: 0,
-                            child: Container(
-                              width: 14,
-                              height: 14,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: status == 1 ? Colors.green : Colors.red,
-                                border: Border.all(
-                                  color: Colors
-                                      .white, // Adds a white border to the dot
-                                  width: 2,
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        borderRadius: BorderRadius.circular(100),
+                        onTap: () {
+                          context.push(
+                            '/announcements',
+                          );
+                        },
+                        child: Stack(
+                          children: [
+                            SvgIcon("assets/icons/bell.svg", size: 28),
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Container(
+                                width: 10,
+                                height: 10,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.orange,
+                                  border: Border.all(
+                                    color: Colors.black,
+                                    width: 1,
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                      ],
-                    ),
-                  )
+                          ],
+                        ),
+                      ),
+                      SizedBox(width: 12),
+                      InkWell(
+                        borderRadius: BorderRadius.circular(100),
+                        onTap: () {
+                          context.push('/me', extra: {
+                            'user': user ??
+                                UserModel(
+                                    email: "xx11btech110xx@iith.ac.in",
+                                    name: "User"),
+                            'image': image,
+                            'onThemeChanged': onThemeChanged,
+                          });
+                        },
+                        child: Stack(
+                          children: [
+                            ClipOval(
+                              child: CircleAvatar(
+                                radius: 24,
+                                child: CachedNetworkImage(
+                                  imageUrl: image,
+                                  fit: BoxFit.cover,
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.person),
+                                  placeholder: (context, url) =>
+                                      CircularProgressIndicator(),
+                                ),
+                              ),
+                            ),
+                            if (status != -1)
+                              Positioned(
+                                top: 0,
+                                right: 0,
+                                child: Container(
+                                  width: 14,
+                                  height: 14,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color:
+                                        status == 1 ? Colors.green : Colors.red,
+                                    border: Border.all(
+                                      color: Colors.white,
+                                      width: 2,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
           ],
         ),
         const SizedBox(

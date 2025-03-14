@@ -631,8 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     25,
                                         isComingSoon: false,
                                         title: 'Cab Sharing',
-                                        child:
-                                            'assets/icons/cabsharing.svg',
+                                        child: 'assets/icons/cabsharing.svg',
                                         onTap: () {
                                           widget.isGuest
                                               ? showError()
@@ -668,8 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Lost & Found',
-                                        child:
-                                            'assets/icons/lostfound.svg',
+                                        child: 'assets/icons/lostfound.svg',
                                         onTap: widget.isGuest
                                             ? showError
                                             : () => context.push('/lnf',
