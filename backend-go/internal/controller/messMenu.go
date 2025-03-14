@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -30,30 +31,47 @@ func GetMessMenu(c *gin.Context) {
 
 	// Read the current week from config.json
 	configPath := filepath.Join(dir, "config.json")
+	var config map[string]interface{}
+
 	configFile, err := os.Open(configPath)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: missing config.json"})
-		return
-	}
-	defer configFile.Close()
+		if os.IsNotExist(err) {
+			config = map[string]interface{}{"week": 0}
 
-	var config map[string]interface{}
-	if err := json.NewDecoder(configFile).Decode(&config); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: invalid config.json"})
-		return
+			file, err := os.Create(configPath)
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create config.json"})
+				return
+			}
+			defer file.Close()
+
+			if err := json.NewEncoder(file).Encode(config); err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to write to config.json"})
+				return
+			}
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: error accessing config.json"})
+			return
+		}
+	} else {
+		defer configFile.Close()
+
+		// Read the existing configuration
+		if err := json.NewDecoder(configFile).Decode(&config); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: invalid config.json"})
+			return
+		}
 	}
 
 	// reading week number from config.json
-	week, ok := config["week"].(float64)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: invalid week format"})
-		return
-	}
+	week, _ := config["week"].(float64)
+	weekStr := strconv.FormatFloat(week, 'f', -1, 64)
 
 	// Read the menu file for the current week
-	menuPath := filepath.Join(dir, strconv.Itoa(int(week))+".json")
+	menuPath := filepath.Join(dir, weekStr+".json")
 	menuFile, err := os.Open(menuPath)
 	if err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: missing menu file"})
 		return
 	}
@@ -187,11 +205,7 @@ func GetCurrentWeekNumber(c *gin.Context) {
 		return
 	}
 
-	week, ok := config["week"].(float64)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error: invalid week format"})
-		return
-	}
+	week, _ := config["week"].(float64)
 
 	// send week number in response
 	c.JSON(http.StatusOK, gin.H{"week": int(week)})

@@ -84,6 +84,14 @@ func SetupRoutes(router *gin.Engine) {
 		timetableGroup.DELETE("/share/:code", middlewares.AuthMiddleware(), controller.DeleteSharedTimetable)
 	}
 
+	// Routes for Mess Menu
+	messMenuGroup := router.Group("/mess_menu")
+	{
+		messMenuGroup.GET("/", controller.GetMessMenu)
+		messMenuGroup.POST("/", controller.PostMessMenu)
+		messMenuGroup.GET("/week", controller.GetCurrentWeekNumber)
+	}
+
 	// GET : /announcements?limit=4&offset=4
 	router.GET("/announcements", controller.GetAnnouncements)
 	router.Static("/announcements/images", "announcementImages/")
