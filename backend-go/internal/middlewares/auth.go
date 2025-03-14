@@ -27,8 +27,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 		} else {
 			// not suggested to store email in cookie
-			// here we retrieve email stored in cookie and pass it via context
-			c.Set("id", claims["id"])
+			c.Set("user_id", claims["sub"])
 		}
 		c.Next()
 	}
