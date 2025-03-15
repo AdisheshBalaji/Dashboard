@@ -1,14 +1,13 @@
 package controller
 
 import (
-	"bytes"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"image"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -45,13 +44,14 @@ func PostAnnouncement(c *gin.Context) {
 		return
 	}
 
-	imgData, err := base64.StdEncoding.DecodeString(announcement.Base64Image)
+	img, err := announcement.Image.Open()
 	if err != nil {
-		fmt.Println("ERROR: Invalid Base64 Format")
+		fmt.Println("ERROR: Could not open image")
 		c.Status(http.StatusBadRequest)
 		return
 	}
-	_, format, err := image.DecodeConfig(bytes.NewReader(imgData))
+
+	_, format, err := image.DecodeConfig(img)
 	if err != nil {
 		fmt.Println("ERROR: Corrupt Image Data")
 		c.Status(http.StatusBadRequest)
@@ -66,10 +66,24 @@ func PostAnnouncement(c *gin.Context) {
 	}
 
 	fileName := strconv.Itoa(id) + "." + format
-	err = os.WriteFile("announcementImages/"+fileName, imgData, 0644)
+	if _, err := os.Stat("announcementImages/"); err != nil {
+		err := os.Mkdir("announcementImages/", 0777)
+
+		if err != nil {
+			fmt.Println("Error: Could not make directory to save announcement Images")
+			return
+		}
+	}
+
+	img.Seek(0, io.SeekStart)
+	imgBytes, _ := io.ReadAll(img)
+
+	err = os.WriteFile("announcementImages/"+fileName, imgBytes, 0777)
+	fmt.Println(fileName)
 	if err != nil {
 		fmt.Println("Error: Saving Image to Disk")
 		c.Status(http.StatusBadRequest)
+		db.DeleteAnnouncementFromDB(c, id)
 		return
 	}
 

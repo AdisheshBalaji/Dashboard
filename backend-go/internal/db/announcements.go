@@ -81,3 +81,13 @@ func PostAnnouncementToDB(c *gin.Context, announcement *schema.RequestAnnounceme
 
 	return id, nil
 }
+
+func DeleteAnnouncementFromDB(c *gin.Context, id int) {
+	query := `DELETE FROM announcements WHERE id=$1`
+	_, err := config.DB.Exec(c, query, id)
+	if err != nil {
+		fmt.Println("ERROR: Deleting Announcement from DB")
+		return
+	}
+	fmt.Printf("SUCCESS: Deleted Record from Announcement DB with id %v", id)
+}
