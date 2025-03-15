@@ -194,10 +194,11 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
           if (index < announcements.length) {
             final announcement = announcements[index];
             if (_highlightedFilterOptions[_selectedChipIndex] != 'All') {
-							if (! announcement.tags.contains(_highlightedFilterOptions[_selectedChipIndex])){
-								return null;
-							}
-						}
+              if (!announcement.tags
+                  .contains(_highlightedFilterOptions[_selectedChipIndex])) {
+                return const SizedBox.shrink();
+              }
+            }
             return AnnouncementCard(
                 image: announcement.imageUrl,
                 source: announcement.createdBy,

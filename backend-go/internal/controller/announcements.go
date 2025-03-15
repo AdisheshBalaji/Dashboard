@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -45,8 +46,22 @@ func PostAnnouncement(c *gin.Context) {
 		return
 	}
 
-	for idx, tag := range announcement.Tags {
-		announcement.Tags[idx] = strings.ToUpper(tag[0:1]) + strings.ToLower(tag[1:])
+	{
+		filterFile, _ := os.Open("announcementFilters.json")
+		defer filterFile.Close()
+		fileData, _ := io.ReadAll(filterFile)
+		var tags []string
+		json.Unmarshal(fileData, &tags)
+
+		for idx, tag := range announcement.Tags {
+			announcement.Tags[idx] = strings.ToUpper(tag[0:1]) + strings.ToLower(tag[1:])
+			if !slices.Contains(tags, announcement.Tags[idx]) {
+				c.Status(http.StatusBadRequest)
+				fmt.Println("ERROR: Non Existent Tag")
+				return
+			}
+
+		}
 	}
 
 	img, err := announcement.Image.Open()
@@ -96,6 +111,9 @@ func PostAnnouncement(c *gin.Context) {
 }
 
 func GetAnnouncementsFilters(c *gin.Context) {
-	dat, _ := json.Marshal([]string{"All", "Lambda", "Kludge", "Gymkhana", "EBSB"})
-	c.JSON(http.StatusOK, string(dat))
+	filters, _ := os.Open("announcementFilters.json")
+	defer filters.Close()
+	fileData, _ := io.ReadAll(filters)
+
+	c.JSON(http.StatusOK, string(fileData))
 }
