@@ -1081,6 +1081,20 @@ class ApiServices {
     return null;
   }
 
+	Future<List<String>?> getAnnouncementsFilters() async{
+		try{
+      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/filters");
+
+			final response = await dio.get('${dio.options.baseUrl}/announcements/filters');
+			final data =json.decode(response.data).cast<String>();
+			return data;
+
+		}catch(e){
+      debugPrint("Failed to fetch announcements filters: $e");
+		}
+			return null;
+	}
+
   Future<Map<String, dynamic>?> getRecentTransaction(
       BuildContext context) async {
     try {

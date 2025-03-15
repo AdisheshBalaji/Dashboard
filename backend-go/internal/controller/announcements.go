@@ -3,6 +3,7 @@ package controller
 import (
 	"bytes"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"image"
 	_ "image/gif"
@@ -67,10 +68,15 @@ func PostAnnouncement(c *gin.Context) {
 	fileName := strconv.Itoa(id) + "." + format
 	err = os.WriteFile("announcementImages/"+fileName, imgData, 0644)
 	if err != nil {
-		fmt.Println("Error: Saving File to Disk")
+		fmt.Println("Error: Saving Image to Disk")
 		c.Status(http.StatusBadRequest)
 		return
 	}
 
 	c.Status(http.StatusOK)
+}
+
+func GetAnnouncementsFilters(c *gin.Context) {
+	dat, _ := json.Marshal([]string{"All", "Lambda", "Kludge", "Gymkhana", "EBSB"})
+	c.JSON(http.StatusOK, string(dat))
 }

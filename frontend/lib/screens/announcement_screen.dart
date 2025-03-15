@@ -13,7 +13,7 @@ class AnnouncementScreen extends StatefulWidget {
 
 class _AnnouncementScreenState extends State<AnnouncementScreen> {
   final ApiServices apiServices = ApiServices();
-  final List<String> _highlightedFilterOptions = ['All', 'All 2', 'All 3'];
+  List<String> _highlightedFilterOptions = ['All', 'All 2', 'All 3'];
   final ScrollController _scrollController = ScrollController();
 
   int _selectedChipIndex = 0;
@@ -43,6 +43,13 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     });
 
     final response = await ApiServices().getAnnouncements(limit, offset);
+		final filters = await ApiServices().getAnnouncementsFilters();
+		
+		if(filters == null){
+			debugPrint('Error: Could not fetch filters');
+		}else{
+			_highlightedFilterOptions = filters;
+		}
 
     if (response == null) {
       setState(() {
@@ -101,7 +108,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 return Row(
                   children: [
                     SizedBox(
-                      width: screenWidth * 0.7,
+                      //width: screenWidth * 0.7,
+                      width: screenWidth,
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.fromLTRB(16, 5, 8, 5),
@@ -137,6 +145,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         ),
                       ),
                     ),
+										/*
                     VerticalDivider(
                       width: 1,
                       thickness: 1,
@@ -167,6 +176,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         ),
                       ),
                     ),
+										*/
                   ],
                 );
               },
