@@ -43,13 +43,13 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     });
 
     final response = await ApiServices().getAnnouncements(limit, offset);
-		final filters = await ApiServices().getAnnouncementsFilters();
-		
-		if(filters == null){
-			debugPrint('Error: Could not fetch filters');
-		}else{
-			_highlightedFilterOptions = filters;
-		}
+    final filters = await ApiServices().getAnnouncementsFilters();
+
+    if (filters == null) {
+      debugPrint('Error: Could not fetch filters');
+    } else {
+      _highlightedFilterOptions = filters;
+    }
 
     if (response == null) {
       setState(() {
@@ -59,7 +59,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     } else {
       setState(() {
         announcements.addAll(response);
-        offset += 1;
+        offset += 10;
       });
     }
 
@@ -74,7 +74,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     fetchAnnouncements();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
         fetchAnnouncements();
       }
     });
@@ -96,7 +97,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
-              color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+              color:
+                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
             ),
           ),
           bottom: PreferredSize(
@@ -129,7 +131,9 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                 selectedColor: Colors.blue,
                                 checkmarkColor: Colors.white,
                                 labelStyle: TextStyle(
-                                  color: _selectedChipIndex == index ? Colors.white : Colors.blue,
+                                  color: _selectedChipIndex == index
+                                      ? Colors.white
+                                      : Colors.blue,
                                 ),
                                 backgroundColor: Colors.transparent,
                                 shape: StadiumBorder(
@@ -145,7 +149,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         ),
                       ),
                     ),
-										/*
+                    /*
                     VerticalDivider(
                       width: 1,
                       thickness: 1,
@@ -191,12 +195,12 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
             final announcement = announcements[index];
 
             return AnnouncementCard(
-              image: announcement.imageUrl,
-              source: announcement.createdBy,
-              date: announcement.createdAt.toString(),
-              title: announcement.title,
-              description: announcement.description,
-            );
+                image: announcement.imageUrl,
+                source: announcement.createdBy,
+                date: announcement.createdAt.toString(),
+                title: announcement.title,
+                description: announcement.description,
+                tags: announcement.tags);
           } else if (isLoading) {
             return Center(
               child: LoadingAnimationWidget.beat(

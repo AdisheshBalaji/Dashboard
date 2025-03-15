@@ -3,29 +3,32 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class AnnouncementCard extends StatelessWidget {
-  AnnouncementCard({
-    super.key,
-    required this.image,
-    required this.source,
-    required this.date,
-    required this.title,
-    required this.description,
-  });
+  AnnouncementCard(
+      {super.key,
+      required this.image,
+      required this.source,
+      required this.date,
+      required this.title,
+      required this.description,
+      required this.tags});
 
   final String? image;
   final String source;
   final String date;
   final String title;
   final String description;
+  final List<String> tags;
 
   final ApiServices _apiServices = ApiServices();
 
   String formatDate(int timestamp) {
-    DateTime dateTime =
-        DateTime.fromMillisecondsSinceEpoch(timestamp * 1000); // Convert to milliseconds
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(
+        timestamp * 1000); // Convert to milliseconds
     DateTime now = DateTime.now();
 
-    if (dateTime.year == now.year && dateTime.month == now.month && dateTime.day == now.day) {
+    if (dateTime.year == now.year &&
+        dateTime.month == now.month &&
+        dateTime.day == now.day) {
       return "Today ${DateFormat('h:mma').format(dateTime).toLowerCase()}";
     } else {
       return DateFormat('MMMM d, yyyy').format(dateTime);
@@ -46,7 +49,8 @@ class AnnouncementCard extends StatelessWidget {
         children: [
           if (image != null)
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
               child: Image.network(
                 '${_apiServices.backendUrl}$image',
                 width: double.infinity,
@@ -77,7 +81,10 @@ class AnnouncementCard extends StatelessWidget {
                             Text(
                               source,
                               style: TextStyle(
-                                color: Theme.of(context).textTheme.headlineLarge!.color,
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .headlineLarge!
+                                    .color,
                                 fontSize: 24,
                                 fontWeight: FontWeight.w800,
                               ),
@@ -95,19 +102,34 @@ class AnnouncementCard extends StatelessWidget {
                                 fontWeight: FontWeight.w400,
                               ),
                             ),
-                            Container(
-                              margin: const EdgeInsets.symmetric(horizontal: 8),
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                              decoration: BoxDecoration(
-                                color: Colors.orange,
-                                borderRadius: BorderRadius.circular(16),
-                              ),
-                              child: Text(
-                                'Important',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w500,
+                            Expanded(
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 28,
+                                child: ListView.builder(
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: tags.length,
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, idx) {
+                                    return Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          horizontal: 8),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.orange,
+                                        borderRadius: BorderRadius.circular(16),
+                                      ),
+                                      child: Text(
+                                        tags[idx],
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),
@@ -125,7 +147,8 @@ class AnnouncementCard extends StatelessWidget {
                       Text(
                         title,
                         style: TextStyle(
-                          color: Theme.of(context).textTheme.headlineLarge!.color,
+                          color:
+                              Theme.of(context).textTheme.headlineLarge!.color,
                           fontSize: 24,
                           fontWeight: FontWeight.w700,
                         ),
@@ -144,7 +167,8 @@ class AnnouncementCard extends StatelessWidget {
                           child: Text(
                             '${'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\','.substring(0, 200)}...', // Show only first 100 characters followed by ellipsis
                             style: TextStyle(
-                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                              color:
+                                  Theme.of(context).textTheme.bodyLarge!.color,
                               fontSize: 14,
                               fontWeight: FontWeight.w400,
                             ),
@@ -154,7 +178,8 @@ class AnnouncementCard extends StatelessWidget {
                         Text(
                           'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\'Join us for a review of our performance over the last quarter. We will discuss key achievements and areas for improvement.\',',
                           style: TextStyle(
-                            color: Theme.of(context).textTheme.bodyMedium!.color,
+                            color:
+                                Theme.of(context).textTheme.bodyMedium!.color,
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                           ),
