@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/LambdaIITH/Dashboard/backend/internal/db"
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
@@ -42,6 +43,10 @@ func PostAnnouncement(c *gin.Context) {
 	if c.Bind(&announcement) != nil {
 		fmt.Println("ERROR: Post Announcement Data could not bind")
 		return
+	}
+
+	for idx, tag := range announcement.Tags {
+		announcement.Tags[idx] = strings.ToUpper(tag[0:1]) + strings.ToLower(tag[1:])
 	}
 
 	img, err := announcement.Image.Open()

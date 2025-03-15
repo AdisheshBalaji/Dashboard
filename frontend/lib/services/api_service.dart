@@ -1081,19 +1081,20 @@ class ApiServices {
     return null;
   }
 
-	Future<List<String>?> getAnnouncementsFilters() async{
-		try{
-      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/filters");
+  Future<List<String>?> getAnnouncementsFilters() async {
+    try {
+      debugPrint(
+          "Making request to: ${dio.options.baseUrl}/announcements/filters");
 
-			final response = await dio.get('${dio.options.baseUrl}/announcements/filters');
-			final data =json.decode(response.data).cast<String>();
-			return data;
-
-		}catch(e){
+      final response =
+          await dio.get('${dio.options.baseUrl}/announcements/filters');
+      final data = json.decode(response.data).cast<String>();
+      return data;
+    } catch (e) {
       debugPrint("Failed to fetch announcements filters: $e");
-		}
-			return null;
-	}
+    }
+    return null;
+  }
 
   Future<Map<String, dynamic>?> getRecentTransaction(
       BuildContext context) async {
@@ -1143,7 +1144,8 @@ class ApiServices {
       List<MultipartFile> multiPartList = [
         await MultipartFile.fromFile(
           capturedImage!.path,
-          filename: "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
+          filename:
+              "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
         )
       ];
 
@@ -1164,7 +1166,10 @@ class ApiServices {
       if (response.statusCode == 200) {
         return {'status': response.statusCode, 'data': response.data};
       } else {
-        return {'error': 'Failed to upload: ${response.statusMessage}', 'status': response.statusCode};
+        return {
+          'error': 'Failed to upload: ${response.statusMessage}',
+          'status': response.statusCode
+        };
       }
     } catch (e) {
       debugPrint("Upload failed: $e");

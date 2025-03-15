@@ -13,7 +13,7 @@ class AnnouncementScreen extends StatefulWidget {
 
 class _AnnouncementScreenState extends State<AnnouncementScreen> {
   final ApiServices apiServices = ApiServices();
-  List<String> _highlightedFilterOptions = ['All', 'All 2', 'All 3'];
+  List<String> _highlightedFilterOptions = ['All'];
   final ScrollController _scrollController = ScrollController();
 
   int _selectedChipIndex = 0;
@@ -193,7 +193,11 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
         itemBuilder: (context, index) {
           if (index < announcements.length) {
             final announcement = announcements[index];
-
+            if (_highlightedFilterOptions[_selectedChipIndex] != 'All') {
+							if (! announcement.tags.contains(_highlightedFilterOptions[_selectedChipIndex])){
+								return null;
+							}
+						}
             return AnnouncementCard(
                 image: announcement.imageUrl,
                 source: announcement.createdBy,

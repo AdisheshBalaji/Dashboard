@@ -40,7 +40,6 @@ func GetAnnouncementsFromDB(c *gin.Context, limit int, offset int) ([]schema.Ann
 			fmt.Printf("Error: Scanning Rows for Announcements\n")
 			return nil, err
 		}
-		fmt.Println(announcement.Tags)
 
 		hasImg := false
 		for _, val := range imgFileNames {
