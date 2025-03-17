@@ -91,6 +91,9 @@ dev_dependencies:
 
   # flutter_launcher_icons: "^0.13.1"
 
+dependency_overrides:
+  camera_android_camerax: 0.6.11
+
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true

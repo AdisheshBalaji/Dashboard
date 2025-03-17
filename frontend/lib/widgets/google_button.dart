@@ -1,3 +1,4 @@
+import 'package:dashbaord/widgets/login_guest.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -236,6 +237,8 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
         const SizedBox(
           height: 10,
         ),
+				ContinueAsGuest(onThemeChanged: widget.onThemeChanged),
+				/*
         Container(
           height: 60,
           width: double.infinity,
@@ -268,6 +271,7 @@ class _CustomGoogleButtonState extends State<CustomGoogleButton> {
             ),
           ),
         )
+				*/
       ],
     );
   }

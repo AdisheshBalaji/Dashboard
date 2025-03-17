@@ -631,8 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     25,
                                         isComingSoon: false,
                                         title: 'Cab Sharing',
-                                        child:
-                                            'assets/icons/cabsharing.svg',
+                                        child: 'assets/icons/cabsharing.svg',
                                         onTap: () {
                                           widget.isGuest
                                               ? showError()
@@ -668,8 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         isComingSoon: false,
                                         reduceImageSize: true,
                                         title: 'Lost & Found',
-                                        child:
-                                            'assets/icons/lostfound.svg',
+                                        child: 'assets/icons/lostfound.svg',
                                         onTap: widget.isGuest
                                             ? showError
                                             : () => context.push('/lnf',
@@ -758,9 +756,24 @@ class _HomeScreenState extends State<HomeScreen> {
                                         title: 'Merch',
                                         child: 'assets/icons/merch.svg',
                                         onTap: () {
-                                          // widget.isGuest
-                                          //     ? showError()
-                                          context.push('/');
+                                          if (widget.isGuest) {
+                                            showError();
+                                          } else {
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(
+                                              SnackBar(
+                                                content: Text('Coming soon!'),
+                                                duration:
+                                                    const Duration(seconds: 2),
+                                                behavior:
+                                                    SnackBarBehavior.floating,
+                                                shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            10)),
+                                              ),
+                                            );
+                                          }
                                         },
                                       ),
                                     ),

@@ -17,7 +17,6 @@ func User(c *gin.Context) {
 
 	userDetails := db.GetUser(c, userId)
 	c.JSON(http.StatusOK, userDetails)
-
 }
 
 func UpdateUser(c *gin.Context) {
