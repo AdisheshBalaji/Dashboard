@@ -1,7 +1,8 @@
+import datetime
 import os
 from Routes.Auth.cookie import get_user_id, set_cookie
 from Routes.User.user import get_user
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Request, Response, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
@@ -13,6 +14,7 @@ from Routes.Lost_and_Found.lost import router as lost_router
 from Routes.Auth.controller import router as auth_router
 from Routes.CabSharing.controller import app as cab_router
 from Routes.User.controller import router as user_router
+from lambda_verse import app as lambda_verse_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
@@ -53,6 +55,7 @@ app.include_router(cab_router)
 app.include_router(user_router)
 app.include_router(transport_router)
 app.include_router(transaction_verification_route)
+app.include_router(lambda_verse_router)
 
 async def cookie_verification_middleware(request: Request, call_next):
     if request.method == "OPTIONS":

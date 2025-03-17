@@ -212,3 +212,57 @@ CREATE TABLE IF NOT EXISTS face
     face_url VARCHAR(256) NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+
+CREATE TABLE lambdaverse_registrations (
+    id SERIAL PRIMARY KEY,
+    
+    -- Personal Information
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    institution VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL CHECK (role IN ('student', 'professional', 'faculty', 'other')),
+    
+    -- Registration Metadata
+    source VARCHAR(100) CHECK (source IN ('social', 'friend', 'email', 'website', 'event', 'other', NULL)),
+    registration_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+    
+    -- Interests Data (stored as an array)
+    interests TEXT[] NOT NULL DEFAULT '{}',
+    
+    -- Status and Attendance Tracking
+    status VARCHAR(50) NOT NULL DEFAULT 'registered' 
+        CHECK (status IN ('registered', 'confirmed', 'attended', 'cancelled', 'no-show')),
+    confirmation_date TIMESTAMP WITH TIME ZONE,
+
+    -- Additional Metadata
+    user_agent TEXT,
+    ip_address VARCHAR(45),
+    
+    -- Notes and Administrative Info
+    notes TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    
+    -- Constraints
+    CONSTRAINT unique_email UNIQUE (email)
+);
+
+-- Index to speed up common queries
+CREATE INDEX lambdaverse_reg_name_idx ON lambdaverse_registrations (name);
+CREATE INDEX lambdaverse_reg_institution_idx ON lambdaverse_registrations (institution);
+CREATE INDEX lambdaverse_reg_status_idx ON lambdaverse_registrations (status);
+CREATE INDEX lambdaverse_reg_role_idx ON lambdaverse_registrations (role);
+
+-- Trigger to update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_modified_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_lambdaverse_registrations_timestamp
+BEFORE UPDATE ON lambdaverse_registrations
+FOR EACH ROW
+EXECUTE FUNCTION update_modified_column();
