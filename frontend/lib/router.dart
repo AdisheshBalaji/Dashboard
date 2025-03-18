@@ -18,6 +18,8 @@ import 'package:dashbaord/screens/lost_and_found_item_screen.dart';
 import 'package:dashbaord/screens/lost_and_found_screen.dart';
 import 'package:dashbaord/screens/mess_menu_screen.dart';
 import 'package:dashbaord/screens/profile_screen.dart';
+import 'package:dashbaord/screens/merch_shop_screen.dart';
+import 'package:dashbaord/screens/merch_orders_screen.dart';
 import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
@@ -500,7 +502,45 @@ class AppRouter {
             },
           );
         },
-      )
+      ),
+      GoRoute(
+        path: '/merch',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const MerchShopScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/merch/orders',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const MerchOrdersScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
     ],
     errorBuilder: (context, state) => const ErrorScreen(),
   );

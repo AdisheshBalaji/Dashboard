@@ -18,6 +18,7 @@ from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
 from Routes.Transport.qr import router as transaction_verification_route
 from Routes.notif import send_notifications_to_all_users
+from Routes.Merch.merch import router as merch_router
 from typing import Optional
 from pydantic import BaseModel
 
@@ -53,6 +54,7 @@ app.include_router(cab_router)
 app.include_router(user_router)
 app.include_router(transport_router)
 app.include_router(transaction_verification_route)
+app.include_router(merch_router)
 
 async def cookie_verification_middleware(request: Request, call_next):
     if request.method == "OPTIONS":

@@ -21,10 +21,10 @@ import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
-
 import '../models/transport_qr_model.dart';
 import 'dio_non_web_config.dart' if (dart.library.html) 'dio_web_config.dart';
-
+import '../models/merch_item_model.dart';
+import '../models/merch_order_model.dart';
 class ApiServices {
   static final ApiServices _instance = ApiServices._internal();
   factory ApiServices() => _instance;
@@ -1155,6 +1155,59 @@ class ApiServices {
     } catch (e) {
       debugPrint("Upload failed: $e");
       return {'error': 'Request failed: $e'};
+    }
+
+    
+  }
+
+  Future<List<MerchItem>> getMerchItems() async {
+    try {
+      final response = await dio.get('/api/merch/items');
+      return (response.data as List)
+          .map((item) => MerchItem.fromJson(item))
+          .toList();
+    } catch (e) {
+      debugPrint("Failed to fetch merchandise items: $e");
+      return [];
+    }
+  }
+
+  Future<MerchItem?> getMerchItem(int itemId) async {
+    try {
+      final response = await dio.get('/api/merch/items/$itemId');
+      return MerchItem.fromJson(response.data);
+    } catch (e) {
+      debugPrint("Failed to fetch merchandise item: $e");
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> createMerchOrder(
+      int merchId, String size, String displayName, String vpa, String transactionId) async {
+    try {
+      final response = await dio.post('/api/merch/order', data: {
+        'merch_id': merchId,
+        'size': size,
+        'display_name': displayName,
+        'vpa': vpa,
+        'transaction_id': transactionId,
+      });
+      return response.data;
+    } catch (e) {
+      debugPrint("Failed to create merchandise order: $e");
+      return null;
+    }
+  }
+
+  Future<List<MerchOrder>> getMerchOrders() async {
+    try {
+      final response = await dio.get('/api/merch/orders');
+      return (response.data as List)
+          .map((order) => MerchOrder.fromJson(order))
+          .toList();
+    } catch (e) {
+      debugPrint("Failed to fetch user's merchandise orders: $e");
+      return [];
     }
   }
 }
