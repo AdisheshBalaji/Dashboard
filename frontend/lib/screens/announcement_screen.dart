@@ -1,8 +1,10 @@
 import 'package:dashbaord/models/announcement_model.dart';
 import 'package:dashbaord/widgets/announcement_card.dart';
+import 'package:dashbaord/widgets/announcement_scroll_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:go_router/go_router.dart';
 
 class AnnouncementScreen extends StatefulWidget {
   const AnnouncementScreen({super.key});
@@ -14,13 +16,34 @@ class AnnouncementScreen extends StatefulWidget {
 class _AnnouncementScreenState extends State<AnnouncementScreen> {
   final ApiServices apiServices = ApiServices();
   List<String> _highlightedFilterOptions = ['All'];
+  final List<String> _filterOptions = ['All', 'Unread', 'Important', 'More Filters...'];
+  final List<String> tags = [
+    'All',
+    'Courses',
+    'Admin',
+    'Mess',
+    'Scholarship',
+    'ERP',
+    'OCS',
+    'Talks',
+    'Transport',
+    'Hostel Office',
+    'Director',
+    'Tag A',
+    'Tag B',
+    'Tag C',
+    'Tag D',
+  ];
+  List<String> selectedTags = ['All'];
   final ScrollController _scrollController = ScrollController();
 
   int _selectedChipIndex = 0;
+  int _filterOptionChipIndex = 0;
   int limit = 10;
   int offset = 0;
   bool isLoading = false;
   bool loadedAll = false;
+  bool isFilterOpen = false;
   List<AnnouncementModel> announcements = [];
 
   void showError({String? msg}) {
@@ -74,8 +97,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     fetchAnnouncements();
 
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         fetchAnnouncements();
       }
     });
@@ -91,56 +113,75 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          leading: const BackButton(color: Colors.blue),
-          title: Text(
-            'Announcements',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color:
-                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-            ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            size: 30.0,
           ),
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(60),
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final screenWidth = constraints.maxWidth;
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
+            }
+          },
+        ),
+        title: Text(
+          'Announcements',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.search,
+              size: 30.0,
+            ),
+            onPressed: () {
+              print("Search button pressed");
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(
+            (_filterOptionChipIndex == 3) ? 540 : 60,
+          ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final screenWidth = constraints.maxWidth;
 
-                return Row(
-                  children: [
-                    SizedBox(
-                      //width: screenWidth * 0.7,
-                      width: screenWidth,
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.fromLTRB(16, 5, 8, 5),
-                        child: Row(
-                          children: List.generate(
-                            _highlightedFilterOptions.length,
-                            (index) => Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: FilterChip(
-                                selected: _selectedChipIndex == index,
-                                label: Text(_highlightedFilterOptions[index]),
-                                onSelected: (bool selected) {
-                                  setState(() {
-                                    _selectedChipIndex = selected ? index : 0;
-                                  });
-                                },
-                                selectedColor: Colors.blue,
-                                checkmarkColor: Colors.white,
-                                labelStyle: TextStyle(
-                                  color: _selectedChipIndex == index
-                                      ? Colors.white
-                                      : Colors.blue,
-                                ),
-                                backgroundColor: Colors.transparent,
-                                shape: StadiumBorder(
-                                  side: BorderSide(
-                                    color: _selectedChipIndex == index
-                                        ? Colors.blue
-                                        : Colors.blue.withOpacity(0.5),
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      SizedBox(
+                        width: screenWidth,
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          padding: const EdgeInsets.fromLTRB(16, 5, 8, 5),
+                          child: Row(
+                            children: List.generate(
+                              _filterOptions.length,
+                              (index) => Padding(
+                                padding: const EdgeInsets.only(right: 8),
+                                child: FilterChip(
+                                  selected: _filterOptionChipIndex == index,
+                                  label: Text(_filterOptions[index]),
+                                  onSelected: (bool selected) {
+                                    setState(() {
+                                      _filterOptionChipIndex = selected ? index : 0;
+                                    });
+                                  },
+                                  selectedColor: const Color.fromRGBO(237, 90, 36, 1),
+                                  showCheckmark: false,
+                                  labelStyle: const TextStyle(color: Colors.white),
+                                  backgroundColor: const Color.fromRGBO(48, 48, 48, 1),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14),
                                   ),
                                 ),
                               ),
@@ -148,44 +189,154 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                           ),
                         ),
                       ),
-                    ),
-                    /*
-                    VerticalDivider(
-                      width: 1,
-                      thickness: 1,
-                      color: const Color.fromARGB(255, 255, 255, 255),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.02),
-                      child: FilterChip(
-                        selected: _selectedChipIndex == 3,
-                        label: Text('Filters'),
-                        onSelected: (bool selected) {
-                          setState(() {
-                            _selectedChipIndex = selected ? 3 : 0;
-                          });
-                        },
-                        selectedColor: Colors.blue,
-                        checkmarkColor: Colors.white,
-                        labelStyle: TextStyle(
-                          color: _selectedChipIndex == 3 ? Colors.white : Colors.blue,
-                        ),
-                        backgroundColor: Colors.transparent,
-                        shape: StadiumBorder(
-                          side: BorderSide(
-                            color: _selectedChipIndex == 3
-                                ? Colors.blue
-                                : Colors.blue.withOpacity(0.5),
+                    ],
+                  ),
+                  if (_filterOptionChipIndex == 3)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 20),
+                        const Center(
+                          child: Text(
+                            'Filters',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 30.0),
+                          child: const Text(
+                            'Categories',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                          child: Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: _highlightedFilterOptions.map((category) {
+                              final isSelected =
+                                  _selectedChipIndex == _highlightedFilterOptions.indexOf(category);
+                              return FilterChip(
+                                label: Text(category),
+                                selected: isSelected,
+                                onSelected: (selected) {
+                                  setState(() {
+                                    _selectedChipIndex ==
+                                        _highlightedFilterOptions.indexOf(category);
+                                  });
+                                },
+                                backgroundColor: const Color(0xFF2A2A2A),
+                                selectedColor: const Color(0xFFFF5722),
+                                checkmarkColor: Colors.transparent,
+                                showCheckmark: false,
+                                labelStyle: TextStyle(
+                                  color: isSelected ? Colors.white : Colors.white70,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 30.0),
+                          child: const Text(
+                            'Tags',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.white70,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          height: 140,
+                          child: ScrollConfiguration(
+                            behavior: CustomScrollBehavior(),
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 20.0, right: 20.0),
+                                child: Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: tags.map((tag) {
+                                    final isSelected = selectedTags.contains(tag);
+                                    return FilterChip(
+                                      label: Text(tag),
+                                      selected: isSelected,
+                                      onSelected: (selected) {
+                                        setState(() {
+                                          if (tag == 'All') {
+                                            selectedTags = ['All'];
+                                          } else {
+                                            selectedTags.remove('All');
+                                            if (selected) {
+                                              selectedTags.add(tag);
+                                            } else {
+                                              selectedTags.remove(tag);
+                                            }
+                                            if (selectedTags.isEmpty) {
+                                              selectedTags = ['All'];
+                                            }
+                                          }
+                                        });
+                                      },
+                                      backgroundColor: const Color(0xFF2A2A2A),
+                                      selectedColor: const Color(0xFFFF5722),
+                                      checkmarkColor: Colors.transparent,
+                                      showCheckmark: false,
+                                      labelStyle: TextStyle(
+                                        color: isSelected ? Colors.white : Colors.white70,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      padding:
+                                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        Center(
+                          child: GestureDetector(
+                            onTap: () {
+                              // Close filters
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(vertical: 16),
+                              padding: const EdgeInsets.all(12),
+                              child: const Icon(
+                                Icons.close,
+                                color: Color(0xFFFF5722),
+                                size: 28,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-										*/
-                  ],
-                );
-              },
-            ),
-          )),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
       body: ListView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
@@ -194,8 +345,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
           if (index < announcements.length) {
             final announcement = announcements[index];
             if (_highlightedFilterOptions[_selectedChipIndex] != 'All') {
-              if (!announcement.tags
-                  .contains(_highlightedFilterOptions[_selectedChipIndex])) {
+              if (!announcement.tags.contains(_highlightedFilterOptions[_selectedChipIndex])) {
                 return const SizedBox.shrink();
               }
             }
