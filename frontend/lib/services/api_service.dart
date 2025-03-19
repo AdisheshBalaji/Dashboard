@@ -25,6 +25,7 @@ import '../models/transport_qr_model.dart';
 import 'dio_non_web_config.dart' if (dart.library.html) 'dio_web_config.dart';
 import '../models/merch_item_model.dart';
 import '../models/merch_order_model.dart';
+
 class ApiServices {
   static final ApiServices _instance = ApiServices._internal();
   factory ApiServices() => _instance;
@@ -1129,7 +1130,8 @@ class ApiServices {
       List<MultipartFile> multiPartList = [
         await MultipartFile.fromFile(
           capturedImage!.path,
-          filename: "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
+          filename:
+              "IITH_DASHBOARD_BY_LAMBDA-${capturedImage.path.split('/').last}-${DateTime.now().toIso8601String()}",
         )
       ];
 
@@ -1150,19 +1152,20 @@ class ApiServices {
       if (response.statusCode == 200) {
         return {'status': response.statusCode, 'data': response.data};
       } else {
-        return {'error': 'Failed to upload: ${response.statusMessage}', 'status': response.statusCode};
+        return {
+          'error': 'Failed to upload: ${response.statusMessage}',
+          'status': response.statusCode
+        };
       }
     } catch (e) {
       debugPrint("Upload failed: $e");
       return {'error': 'Request failed: $e'};
     }
-
-    
   }
 
   Future<List<MerchItem>> getMerchItems() async {
     try {
-      final response = await dio.get('/api/merch/items');
+      final response = await dio.get('/merch/items');
       return (response.data as List)
           .map((item) => MerchItem.fromJson(item))
           .toList();
@@ -1174,7 +1177,7 @@ class ApiServices {
 
   Future<MerchItem?> getMerchItem(int itemId) async {
     try {
-      final response = await dio.get('/api/merch/items/$itemId');
+      final response = await dio.get('/merch/items/$itemId');
       return MerchItem.fromJson(response.data);
     } catch (e) {
       debugPrint("Failed to fetch merchandise item: $e");
@@ -1182,10 +1185,10 @@ class ApiServices {
     }
   }
 
-  Future<Map<String, dynamic>?> createMerchOrder(
-      int merchId, String size, String displayName, String vpa, String transactionId) async {
+  Future<Map<String, dynamic>?> createMerchOrder(int merchId, String size,
+      String displayName, String vpa, String transactionId) async {
     try {
-      final response = await dio.post('/api/merch/order', data: {
+      final response = await dio.post('/merch/order', data: {
         'merch_id': merchId,
         'size': size,
         'display_name': displayName,
@@ -1201,7 +1204,7 @@ class ApiServices {
 
   Future<List<MerchOrder>> getMerchOrders() async {
     try {
-      final response = await dio.get('/api/merch/orders');
+      final response = await dio.get('/merch/orders');
       return (response.data as List)
           .map((order) => MerchOrder.fromJson(order))
           .toList();

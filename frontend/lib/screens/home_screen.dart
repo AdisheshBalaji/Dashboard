@@ -756,6 +756,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         title: 'Merch',
                                         child: 'assets/icons/merch.svg',
                                         onTap: () {
+                                          context.push("/merch");
+                                          return;
                                           if (widget.isGuest) {
                                             showError();
                                           } else {
