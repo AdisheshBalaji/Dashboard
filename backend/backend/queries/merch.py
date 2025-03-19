@@ -2,6 +2,7 @@ from pypika import Query, Table, Order, functions as fn
 from pypika.dialects import PostgreSQLQuery
 
 merch = Table("merch")
+merch_images = Table("merch_images")
 orders = Table("orders")
 
 def get_all_merch_items() -> str:
@@ -9,6 +10,15 @@ def get_all_merch_items() -> str:
         merch.id, merch.title, merch.deadline, merch.price,
         merch.image_url, merch.description, merch.upi_id, merch.created_at
     ).orderby(merch.id, order=Order.desc)
+    return query.get_sql()
+
+def get_merch_images(merch_id: int = None) -> str:
+    query = Query.from_(merch_images).select(
+        merch_images.merch_id, merch_images.image_url
+    )
+    if merch_id is not None:
+        query = query.where(merch_images.merch_id == merch_id)
+    
     return query.get_sql()
 
 def get_merch_item(item_id: int) -> str:

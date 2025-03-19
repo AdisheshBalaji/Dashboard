@@ -4,6 +4,7 @@ import 'package:dashbaord/models/merch_item_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/screens/merch_payment_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 
 class MerchItemDetailsScreen extends StatefulWidget {
   final int itemId;
@@ -21,6 +22,8 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
   String? _errorMessage;
   String _selectedSize = 'M';
   final List<String> _availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+  int _currentImageIndex = 0;
+  final CarouselSliderController _carouselController = CarouselSliderController();
 
   @override
   void initState() {
@@ -48,6 +51,14 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
     }
   }
 
+  List<String> _getAllImageUrls() {
+    if (_item == null) return [];
+    
+    List<String> allImages = [_item!.imageUrl];
+    allImages.addAll(_item!.images.map((img) => img.url));
+    return allImages;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -60,7 +71,80 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
     );
   }
 
+  Widget _buildImageCarousel() {
+    final List<String> imageUrls = _getAllImageUrls();
+    
+    return Column(
+      children: [
+        CarouselSlider(
+          carouselController: _carouselController,
+          options: CarouselOptions(
+            height: MediaQuery.of(context).size.height * 0.4,
+            viewportFraction: 1.0,
+            enlargeCenterPage: false,
+            enableInfiniteScroll: imageUrls.length > 1,
+            onPageChanged: (index, reason) {
+              setState(() {
+                _currentImageIndex = index;
+              });
+            },
+          ),
+          items: imageUrls.map((imageUrl) {
+            return Builder(
+              builder: (BuildContext context) {
+                return Hero(
+                  tag: imageUrl == _item!.imageUrl 
+                      ? 'merch_image_${_item!.id}' 
+                      : 'merch_image_${_item!.id}_${imageUrls.indexOf(imageUrl)}',
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    placeholder: (context, url) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(child: CircularProgressIndicator()),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      color: Colors.grey[200],
+                      child: const Center(
+                        child: Icon(Icons.error, size: 50, color: Colors.grey),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            );
+          }).toList(),
+        ),
+        if (imageUrls.length > 1)
+          Container(
+            margin: const EdgeInsets.only(top: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: imageUrls.asMap().entries.map((entry) {
+                return GestureDetector(
+                  onTap: () => _carouselController.animateToPage(entry.key),
+                  child: Container(
+                    width: 8.0,
+                    height: 8.0,
+                    margin: const EdgeInsets.symmetric(horizontal: 4.0),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: _currentImageIndex == entry.key
+                          ? Theme.of(context).primaryColor
+                          : Colors.grey.shade300,
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _buildBottomBar() {
+    // Existing bottom bar code remains unchanged
     bool isAvailable = _item!.deadline.isAfter(DateTime.now());
     
     return Container(
@@ -185,25 +269,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: Hero(
-            tag: 'merch_image_${_item!.id}',
-            child: CachedNetworkImage(
-              imageUrl: _item!.imageUrl,
-              height: MediaQuery.of(context).size.height * 0.4,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => Container(
-                color: Colors.grey[200],
-                child: const Center(child: CircularProgressIndicator()),
-              ),
-              errorWidget: (context, url, error) => Container(
-                color: Colors.grey[200],
-                child: const Center(
-                  child: Icon(Icons.error, size: 50, color: Colors.grey),
-                ),
-              ),
-            ),
-          ),
+          child: _buildImageCarousel(),
         ),
         SliverToBoxAdapter(
           child: Transform.translate(
@@ -226,7 +292,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
                   ),
                   
                   const SizedBox(height: 16),
-                  
+
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,

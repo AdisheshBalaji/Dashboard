@@ -8,39 +8,76 @@ import (
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
 )
 
+// GetMerchImages fetches additional images for a merchandise item
+func GetMerchImages(c context.Context, merchID int) ([]schema.MerchImage, error) {
+    rows, err := config.DB.Query(c, `
+        SELECT id, merch_id, image_url, created_at
+        FROM merch_images WHERE merch_id = $1
+        ORDER BY id ASC`, merchID)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var images []schema.MerchImage
+    for rows.Next() {
+        var img schema.MerchImage
+        err = rows.Scan(&img.ID, &img.MerchID, &img.ImageURL, &img.CreatedAt)
+        if err != nil {
+            return nil, err
+        }
+        images = append(images, img)
+    }
+    return images, nil
+}
+
 // Fetch all merchandise items
 func GetAllMerchItems(c context.Context) ([]schema.Merch, error) {
-	rows, err := config.DB.Query(c, `
-		SELECT id, title, deadline, price, image_url, description, upi_id, created_at
-		FROM merch ORDER BY id DESC`)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
+    rows, err := config.DB.Query(c, `
+        SELECT id, title, deadline, price, image_url, description, upi_id, created_at
+        FROM merch ORDER BY id DESC`)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
 
-	var merchList []schema.Merch
-	for rows.Next() {
-		var m schema.Merch
-		err = rows.Scan(&m.ID, &m.Title, &m.Deadline, &m.Price, &m.ImageURL, &m.Description, &m.UPIID, &m.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-		merchList = append(merchList, m)
-	}
-	return merchList, nil
+    var merchList []schema.Merch
+    for rows.Next() {
+        var m schema.Merch
+        err = rows.Scan(&m.ID, &m.Title, &m.Deadline, &m.Price, &m.ImageURL, &m.Description, &m.UPIID, &m.CreatedAt)
+        if err != nil {
+            return nil, err
+        }
+        
+        images, err := GetMerchImages(c, m.ID)
+        if err != nil {
+            return nil, err
+        }
+        m.Images = images
+        
+        merchList = append(merchList, m)
+    }
+    return merchList, nil
 }
 
 // Fetch single merchandise item
 func GetMerchItem(c context.Context, id int) (*schema.Merch, error) {
-	var m schema.Merch
-	err := config.DB.QueryRow(c, `
-		SELECT id, title, deadline, price, image_url, description, upi_id, created_at 
-		FROM merch WHERE id = $1`, id).Scan(
-		&m.ID, &m.Title, &m.Deadline, &m.Price, &m.ImageURL, &m.Description, &m.UPIID, &m.CreatedAt)
-	if err != nil {
-		return nil, err
-	}
-	return &m, nil
+    var m schema.Merch
+    err := config.DB.QueryRow(c, `
+        SELECT id, title, deadline, price, image_url, description, upi_id, created_at 
+        FROM merch WHERE id = $1`, id).Scan(
+        &m.ID, &m.Title, &m.Deadline, &m.Price, &m.ImageURL, &m.Description, &m.UPIID, &m.CreatedAt)
+    if err != nil {
+        return nil, err
+    }
+    
+    images, err := GetMerchImages(c, id)
+    if err != nil {
+        return nil, err
+    }
+    m.Images = images
+    
+    return &m, nil
 }
 
 // Create an order

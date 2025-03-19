@@ -2,15 +2,23 @@ package schema
 
 import "time"
 
+type MerchImage struct {
+	ID        int       `json:"id"`
+	MerchID   int       `json:"merch_id"`
+	ImageURL  string    `json:"url"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
 type Merch struct {
-	ID          int       `json:"id"`
-	Title       string    `json:"title"`
-	Deadline    time.Time `json:"deadline"`
-	Price       float64   `json:"price"`
-	ImageURL    string    `json:"image_url"`
-	Description string    `json:"description"`
-	UPIID       string    `json:"upi_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          int          `json:"id"`
+	Title       string       `json:"title"`
+	Deadline    time.Time    `json:"deadline"`
+	Price       float64      `json:"price"`
+	ImageURL    string       `json:"image_url"`
+	Images      []MerchImage `json:"images"`
+	Description string       `json:"description"`
+	UPIID       string       `json:"upi_id"`
+	CreatedAt   time.Time    `json:"created_at"`
 }
 
 type Order struct {

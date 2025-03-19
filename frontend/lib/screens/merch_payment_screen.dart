@@ -175,6 +175,31 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen> {
                 ),
               ),
               const Text(
+                'Merch Information',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: TextFormField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Display Name',
+                    hintText: 'Enter your merch display name',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return 'Please enter your merch display name';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
                 'Payment Details',
                 style: TextStyle(
                   fontSize: 18,
@@ -251,24 +276,6 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen> {
               ),
               
               const SizedBox(height: 24),
-              
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Display Name',
-                  hintText: 'Enter your full name',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter your name';
-                  }
-                  return null;
-                },
-              ),
-              
-              const SizedBox(height: 16),
-              
               TextFormField(
                 controller: _upiIdController,
                 decoration: const InputDecoration(
@@ -286,16 +293,6 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen> {
                   return null;
                 },
               ),
-              
-              const SizedBox(height: 12),
-              const Text(
-                'Note: Please make the payment to the UPI ID above before submitting',
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  color: Colors.grey,
-                ),
-              ),
-              
               if (_errorMessage != null)
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),

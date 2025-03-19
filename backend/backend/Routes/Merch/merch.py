@@ -7,7 +7,7 @@ from queries.merch import *
 from Routes.User.user import get_user
 
 router = APIRouter(
-    prefix="/api/merch",
+    prefix="/merch",
     tags=["merch"],
 )
 
@@ -32,14 +32,29 @@ def get_items():
         cursor.execute(query)
         items = cursor.fetchall()
         
+        images_query = get_merch_images()
+        cursor.execute(images_query)
+        all_images = cursor.fetchall()
+        images_by_merch_id = {}
+        for image in all_images:
+            merch_id, image_url = image
+            if merch_id not in images_by_merch_id:
+                images_by_merch_id[merch_id] = []
+            images_by_merch_id[merch_id].append({
+                "url": image_url
+            })
+        
         result = []
         for item in items:
+            merch_id = item[0]
+            images = images_by_merch_id.get(merch_id, [])
             result.append({
-                "id": item[0],
+                "id": merch_id,
                 "title": item[1],
                 "deadline": item[2].isoformat(),
                 "price": str(item[3]),
                 "image_url": item[4],
+                "images": images,
                 "description": item[5],
                 "upi_id": item[6],
                 "created_at": item[7].isoformat(),
@@ -64,6 +79,9 @@ def get_item(item_id: int):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Merchandise item with ID {item_id} not found"
             )
+        images_query = get_merch_images(item_id)
+        cursor.execute(images_query)
+        images = [{"url": img[1]} for img in cursor.fetchall()]
         
         return {
             "id": item[0],
@@ -71,6 +89,7 @@ def get_item(item_id: int):
             "deadline": item[2].isoformat(),
             "price": str(item[3]),
             "image_url": item[4],
+            "images": images,
             "description": item[5],
             "upi_id": item[6],
             "created_at": item[7].isoformat(),
@@ -141,7 +160,6 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
 
 @router.get("/orders")
 def list_user_orders(user_id: int = Depends(get_user_id)):
-    """Get orders for the currently logged-in user"""
     try:
         user = get_user(user_id)
         if not user:
@@ -162,7 +180,7 @@ def list_user_orders(user_id: int = Depends(get_user_id)):
                 "image_url": order[4],
                 "size": order[5],
                 "status": order[6],
-                "order_date": order[7].isoformat() if order[7] else None,
+                "order_date": order[7].isoformat(),
                 "transaction_id": order[8],
                 "display_name": order[9]
             })
