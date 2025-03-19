@@ -643,7 +643,7 @@ class _CabCardState extends State<CabCard> {
                                     : Colors.grey[200],
                               ),
                               child: Text(
-                                "Note: $note",
+                                  "Note: ${note.isNotEmpty ? note : 'No notes shared'}",
                                 style: GoogleFonts.inter(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
