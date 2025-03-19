@@ -2,6 +2,7 @@ import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
 import 'package:dashbaord/widgets/custom_appbar.dart';
+import 'package:dashbaord/widgets/custom_search_bar.dart';
 import 'package:dashbaord/widgets/notif_perm.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/lost_and_found_model.dart';
@@ -328,25 +329,26 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SearchBar(
-                                hintText: 'Search...',
-                                controller: _searchController,
-                                onSubmitted: (value) {
-                                  setState(() {
-                                    _search = _searchController.text;
-                                  });
-                                },
-                                trailing: [
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _search = _searchController.text;
-                                      });
-                                    },
-                                    icon: const Icon(Icons.search),
-                                  )
-                                ],
-                              ),
+                              CustomSearchBar(),
+                              // SearchBar(
+                              //   hintText: 'Search...',
+                              //   controller: _searchController,
+                              //   onSubmitted: (value) {
+                              //     setState(() {
+                              //       _search = _searchController.text;
+                              //     });
+                              //   },
+                              //   trailing: [
+                              //     IconButton(
+                              //       onPressed: () {
+                              //         setState(() {
+                              //           _search = _searchController.text;
+                              //         });
+                              //       },
+                              //       icon: const Icon(Icons.search),
+                              //     )
+                              //   ],
+                              // ),
                               const SizedBox(
                                 height: 20,
                               ),

@@ -18,7 +18,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.black,
+      backgroundColor: Theme.of(context).canvasColor,
       elevation: 0,
       leadingWidth: 40,
       leading: Padding(
@@ -33,13 +33,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
+      centerTitle: true,
       title: Padding(
         padding: const EdgeInsets.only(
             left: 8.0),
         child: Text(
           title,
           style: GoogleFonts.outfit(
-            fontSize: 24.0,
+            fontSize: 25.0,
             fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.bodyLarge?.color ??
                 Colors.white,

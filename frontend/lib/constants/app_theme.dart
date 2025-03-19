@@ -7,6 +7,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
   final Color customShadowColor;
   final Color customBusScheduleColor;
   final Color customAccentColor;
+  final Color customMidGrey;
 
   CustomColors({
     required this.customContainerColor,
@@ -14,6 +15,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     required this.customShadowColor,
     required this.customBusScheduleColor,
     required this.customAccentColor,
+    required this.customMidGrey,
   });
 
   @override
@@ -23,6 +25,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
     Color? customShadowColor,
     Color? customBusScheduleColor,
     Color? customAccentColor,
+    Color? customMidGrey,
   }) {
     return CustomColors(
       customContainerColor: customContainerColor ?? this.customContainerColor,
@@ -31,6 +34,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
       customBusScheduleColor:
           customBusScheduleColor ?? this.customBusScheduleColor,
       customAccentColor: customAccentColor ?? this.customAccentColor,
+      customMidGrey: customMidGrey ?? this.customMidGrey,
     );
   }
 
@@ -46,6 +50,7 @@ class CustomColors extends ThemeExtension<CustomColors> {
           Color.lerp(customBusScheduleColor, other.customBusScheduleColor, t)!,
       customAccentColor:
           Color.lerp(customAccentColor, other.customAccentColor, t)!,
+      customMidGrey: Color.lerp(customMidGrey, other.customMidGrey, t)!,
     );
   }
 }
@@ -88,6 +93,7 @@ final ThemeData lightTheme = ThemeData(
       customShadowColor: Color.fromRGBO(51, 51, 51, 0.10),
       customBusScheduleColor: Color.fromARGB(102, 229, 229, 229),
       customAccentColor: Color.fromARGB(255, 240, 91, 37),
+      customMidGrey: Color.fromARGB(255, 48, 48, 48),
     ),
   ],
 );
@@ -132,6 +138,7 @@ final ThemeData darkTheme = ThemeData(
       customShadowColor: Color.fromRGBO(72, 72, 72, 0.259),
       customBusScheduleColor: Color.fromARGB(102, 56, 56, 56),
       customAccentColor: Color.fromARGB(255, 240, 91, 37),
+      customMidGrey: Color.fromARGB(255, 48, 48, 48),
     ),
   ],
 );
