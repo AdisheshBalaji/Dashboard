@@ -15,8 +15,8 @@ import (
 func InsertInLostTable(ctx context.Context, form_data map[string]interface{}, user_ID int) (int, error) {
 	// Query to insert the lost item in the database
 	query := `
-        INSERT INTO lost (item_name, item_description, user_id) 
-        VALUES ($1, $2, $3) 
+        INSERT INTO lost (item_name, item_description, user_id)
+        VALUES ($1, $2, $3)
         RETURNING id
     `
 
@@ -30,11 +30,10 @@ func InsertInLostTable(ctx context.Context, form_data map[string]interface{}, us
 	return lostId, nil
 }
 
-
 func InsertLostImages(ctx context.Context, image_paths []string, post_id int) error {
 	// Query to insert the lost item images in the database
 
-	query := `INSERT INTO lost_images (image_url, item_id) 
+	query := `INSERT INTO lost_images (image_url, item_id)
         VALUES ($1, $2)`
 
 	// 	Execute the query
@@ -152,15 +151,15 @@ func UpdateInLostTable(ctx context.Context, itemID int, formData map[string]inte
 	return updatedItem, nil
 }
 
-func GetParticularLostItem(ctx context.Context, itemID int) (schema.LostItemWithUser, error) {
+func GetParticularLostItem(ctx context.Context, itemID int) (schema.LostItem, error) {
 	// Query to get the particular lost item from the database
 	query := `
-		SELECT 
+		SELECT
 			f.id,
 			f.item_name,
 			f.item_description,
-			f.user_id,
-			u.username,
+			u.name,
+			u.email,
 			f.created_at
 		FROM
 			lost f
@@ -171,13 +170,13 @@ func GetParticularLostItem(ctx context.Context, itemID int) (schema.LostItemWith
 	`
 
 	// Execute the query and scan the result into lostItem
-	var lostItem schema.LostItemWithUser
+	var lostItem schema.LostItem
 	err := config.DB.QueryRow(ctx, query, itemID).Scan(
 		&lostItem.ID,
 		&lostItem.ItemName,
 		&lostItem.ItemDescription,
-		&lostItem.UserID,
 		&lostItem.UserName,
+		&lostItem.UserEmail,
 		&lostItem.CreatedAt,
 	)
 	if err != nil {
@@ -214,7 +213,7 @@ func DeleteItemImagesFromLost(ctx context.Context, itemID int) (string, error) {
 func DeleteAllImageUrisLost(ctx context.Context, itemId int) ([]string, error) {
 	// Query to delete the particular lost item from the database
 	query := `
-    SELECT image_url FROM lost_images WHERE item_id = $1 
+    SELECT image_url FROM lost_images WHERE item_id = $1
   `
 
 	var imageUrls []string

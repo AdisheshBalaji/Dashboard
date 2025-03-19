@@ -31,11 +31,11 @@ func SetupRoutes(router *gin.Engine) {
 	// Group routes for lost items
 	lostGroup := router.Group("/lost")
 	{
-		lostGroup.POST("/add_item", controller.AddItemHandler)
+		lostGroup.POST("/add_item", middlewares.AuthMiddleware(), controller.AddItemHandler)
 		lostGroup.GET("/all", controller.GetAllItemsHandler)
-		lostGroup.GET("/get_item/:id", controller.GetItemByIdHandler)
-		lostGroup.PUT("/edit_item", controller.EditItemHandler)
-		lostGroup.POST("/delete_item", controller.DeleteItemHandler)
+		lostGroup.GET("/item/:id", controller.GetItemByIdHandler)
+		lostGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditItemHandler)
+		lostGroup.POST("/delete_item", middlewares.AuthMiddleware(), controller.DeleteItemHandler)
 		lostGroup.GET("/search", controller.SearchItemHandler)
 	}
 
@@ -66,12 +66,16 @@ func SetupRoutes(router *gin.Engine) {
 		userGroup.PATCH("/fcm/update", middlewares.AuthMiddleware(), controller.UpdateUserFCMToken)
 	}
 
-	router.POST("found/add_item", controller.AddFoundItemHandler)
-	router.GET("/found/all", controller.GetAllFoundItemsHandler)
-	router.GET("/found/get_item/:id", controller.GetFoundItemByIdHandler)
-	router.PUT("/found/edit_item", controller.EditFoundItemHandler)
-	router.POST("/found/delete_item", controller.DeleteFoundItemHandler)
-	router.GET("/found/search", controller.SearchFoundItemHandler)
+	// Group routes for found items
+	foundGroup := router.Group("/found")
+	{
+		foundGroup.POST("/add_item", middlewares.AuthMiddleware(), controller.AddFoundItemHandler)
+		foundGroup.GET("/all", controller.GetAllFoundItemsHandler)
+		foundGroup.GET("/item/:id", controller.GetFoundItemByIdHandler)
+		foundGroup.PUT("/edit_item", middlewares.AuthMiddleware(), controller.EditFoundItemHandler)
+		foundGroup.POST("/delete_item", middlewares.AuthMiddleware(), controller.DeleteFoundItemHandler)
+		foundGroup.GET("/search", controller.SearchFoundItemHandler)
+	}
 
 	//Group routes for timetable/calendar
 	timetableGroup := router.Group("/schedule")
@@ -99,17 +103,17 @@ func SetupRoutes(router *gin.Engine) {
 
 	cabshareGroup := router.Group("/cabshare")
 	{
-		cabshareGroup.GET("/me", controller.CheckAuth)
-		cabshareGroup.POST("/bookings", controller.CreateBooking)
-		cabshareGroup.PATCH("/bookings/:booking_id", controller.UpdateBooking)
-		cabshareGroup.GET("/me/bookings", controller.UserBookings)
-		cabshareGroup.GET("/me/requests", controller.UserRequests)
-		cabshareGroup.GET("/bookings", controller.SearchBookings)
-		cabshareGroup.POST("/bookings/:booking_id/request", controller.RequestToJoinBooking)
-		cabshareGroup.DELETE("/bookings/:booking_id/request", controller.DeleteRequest)
-		cabshareGroup.POST("/bookings/:booking_id/accept", controller.AcceptRequest)
-		cabshareGroup.POST("/bookings/:booking_id/reject", controller.RejectRequest)
-		cabshareGroup.DELETE("/bookings/:booking_id", controller.DeleteExistingBooking)
-		cabshareGroup.DELETE("/bookings/:booking_id/self", controller.ExitBooking)
+		cabshareGroup.GET("/me", middlewares.AuthMiddleware(), controller.CheckAuth)
+		cabshareGroup.POST("/bookings", middlewares.AuthMiddleware(), controller.CreateBooking)
+		cabshareGroup.PATCH("/bookings/:booking_id", middlewares.AuthMiddleware(), controller.UpdateBooking)
+		cabshareGroup.GET("/me/bookings", middlewares.AuthMiddleware(), controller.UserBookings)
+		cabshareGroup.GET("/me/requests", middlewares.AuthMiddleware(), controller.UserRequests)
+		cabshareGroup.GET("/bookings", middlewares.AuthMiddleware(), controller.SearchBookings)
+		cabshareGroup.POST("/bookings/:booking_id/request", middlewares.AuthMiddleware(), controller.RequestToJoinBooking)
+		cabshareGroup.DELETE("/bookings/:booking_id/request", middlewares.AuthMiddleware(), controller.DeleteRequest)
+		cabshareGroup.POST("/bookings/:booking_id/accept", middlewares.AuthMiddleware(), controller.AcceptRequest)
+		cabshareGroup.POST("/bookings/:booking_id/reject", middlewares.AuthMiddleware(), controller.RejectRequest)
+		cabshareGroup.DELETE("/bookings/:booking_id", middlewares.AuthMiddleware(), controller.DeleteExistingBooking)
+		cabshareGroup.DELETE("/bookings/:booking_id/self", middlewares.AuthMiddleware(), controller.ExitBooking)
 	}
 }

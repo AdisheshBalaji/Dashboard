@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -36,6 +37,8 @@ func AddFoundItemHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to insert data"})
 		return
 	}
+	
+	fmt.Println("Inserted data:", result)
 
 	// Upload the images to S3 and save the image URLs in the database
 	form, err := c.MultipartForm()
@@ -43,6 +46,7 @@ func AddFoundItemHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file data"})
 		return
 	}
+	
 	files := form.File["images"]
 	if len(files) > 0 {
 		s3Client := helpers.NewS3Client(os.Getenv("BUCKET_NAME"), os.Getenv("REGION"), os.Getenv("RESOURCE_URI"))
@@ -89,17 +93,23 @@ func GetAllFoundItemsHandler(c *gin.Context) {
 		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
 	}
 
-	// Construct the response similar to Python (list of dicts with item_id, name, images)
-	var response []map[string]interface{}
+	response := make([]map[string]any, 0, len(items))
+
 	for _, item := range items {
-		itemData := map[string]interface{}{
+		images := imageDict[item.ID]
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
 			"id":     item.ID,
 			"name":   item.ItemName,
-			"images": imageDict[item.ID],
+			"images": images,
 		}
 		response = append(response, itemData)
 	}
 
+	// Always return an array (empty if no items found)
 	c.JSON(http.StatusOK, response)
 }
 
@@ -112,6 +122,7 @@ func GetFoundItemByIdHandler(c *gin.Context) {
 	}
 	item, err := found.GetParticularFoundItem(c, id)
 	if err != nil {
+		fmt.Println(err.Error())
 		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
 		return
 	}
@@ -138,9 +149,9 @@ func GetFoundItemByIdHandler(c *gin.Context) {
 		ID:              item.ID,
 		ItemName:        item.ItemName,
 		ItemDescription: item.ItemDescription,
-		UserID:          item.UserID,
+		UserEmail:       item.UserEmail,
+		UserName:        item.UserName,
 		Images:          imageURLs,
-		CreatedAt:       item.CreatedAt,
 		username:        item.UserName,
 	}
 

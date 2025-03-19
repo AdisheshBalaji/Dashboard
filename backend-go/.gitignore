@@ -31,3 +31,5 @@ announcementImages/
 # Project build
 main
 *templ.go
+
+*.json
