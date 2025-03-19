@@ -3,13 +3,16 @@ package schema
 import (
 	"time"
 )
+
 type FoundItem struct {
-	ID              int      `db:"id"`
-	ItemName        string   `db:"item_name"`
-	ItemDescription string   `db:"item_description"`
-	UserID          int      `db:"user_id"`
-	Images          []string `db:"images"`
-	CreatedAt       time.Time   `db:"created_at"`
+	ID              int       `db:"id"`
+	ItemName        string    `db:"item_name"`
+	ItemDescription string    `db:"item_description"`
+	UserID          int       `db:"user_id"`
+	UserName        string    `db:"username"`
+	UserEmail       string    `db:"user_email"`
+	Images          []string  `db:"images"`
+	CreatedAt       time.Time `db:"created_at"`
 }
 
 type FoundItemWithUser struct {
@@ -22,12 +25,14 @@ type FoundItemWithUser struct {
 }
 
 type LostItem struct {
-	ID              int      `db:"id"`
-	ItemName        string   `db:"item_name"`
-	ItemDescription string   `db:"item_description"`
-	UserID          int      `db:"user_id"`
-	Images          []string `db:"images"`
-	CreatedAt       time.Time   `db:"created_at"`
+	ID              int       `db:"id"`
+	ItemName        string    `db:"name"`
+	ItemDescription string    `db:"item_description"`
+	UserID          int       `db:"user_id"`
+	UserName        string    `db:"username"`
+	UserEmail       string    `db:"user_email"`
+	Images          []string  `db:"images"`
+	CreatedAt       time.Time `db:"created_at"`
 }
 
 type LostItemWithUser struct {

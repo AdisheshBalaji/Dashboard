@@ -14,27 +14,29 @@ import (
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
 )
 
-func InsertInFoundTable(ctx context.Context, form_data map[string]interface{}, user_ID int) (map[string]interface{}, error) {
+func InsertInFoundTable(ctx context.Context, form_data map[string]any, user_ID int) (map[string]any, error) {
 	// Query to insert the lost item in the database
 	query := `
         INSERT INTO found (item_name, item_description, user_id) 
         VALUES ($1, $2, $3) 
-        RETURNING *
+        RETURNING id
     `
 
 	// Execute the query
-	var result map[string]interface{}
-	_, err := config.DB.Exec(ctx, query, form_data["item_name"], form_data["item_description"], user_ID)
+	var id int
+	err := config.DB.QueryRow(ctx, query, form_data["item_name"], form_data["item_description"], user_ID).Scan(&id)
 	if err != nil {
 		return nil, err
 	}
+
+	result := map[string]any{"id": id}
 	return result, nil
 }
 
 func InsertFoundImages(ctx context.Context, image_paths []string, post_id int) error {
 	// Query to insert the lost item images in the database
 
-	query := `INSERT INTO found_images (image_url, item_id) 
+	query := `INSERT INTO found_images (image_url, item_id)
         VALUES ($1, $2)`
 
 	// 	Execute the query
@@ -133,26 +135,33 @@ func UpdateInFoundTable(ctx context.Context, itemID int, formData map[string]int
 	return updatedItem, nil
 }
 
-func GetParticularFoundItem(ctx context.Context, item_id int) (schema.FoundItemWithUser, error) {
+func GetParticularFoundItem(ctx context.Context, item_id int) (schema.FoundItem, error) {
 	// Query to get the particular lost item from the database
 	query := `
-  SELECT 
-	  f.id,
-	  f.item_name,
-	  f.item_description,
-	  f.user_id,
-	  u.name,
-	  f.created_at
-  FROM
-	 found f
-  JOIN
-	  users u ON f.user_id = u.id
-  WHERE
-	  f.id = $1
- `
+		SELECT
+			f.id,
+			f.item_name,
+			f.item_description,
+			u.email,
+			u.name,
+			f.created_at
+		FROM
+		found f
+		JOIN
+			users u ON f.user_id = u.id
+		WHERE
+			f.id = $1
+	`
 
-	var foundItem schema.FoundItemWithUser
-	err := config.DB.QueryRow(ctx, query, item_id).Scan(&foundItem)
+	var foundItem schema.FoundItem
+	err := config.DB.QueryRow(ctx, query, item_id).Scan(
+		&foundItem.ID,
+		&foundItem.ItemName,
+		&foundItem.ItemDescription,
+		&foundItem.UserEmail,
+		&foundItem.UserName,
+		&foundItem.CreatedAt,
+	)
 	if err != nil {
 		return foundItem, err
 	}
