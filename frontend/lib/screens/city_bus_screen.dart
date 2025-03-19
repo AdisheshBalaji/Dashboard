@@ -1,6 +1,7 @@
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -156,17 +157,9 @@ class _CityBusScreenState extends State<CityBusScreen>
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        appBar: AppBar(
-            title: Text(
+        appBar: CustomAppBar(
+            title: 
               'Bus Shuttle',
-              style: TextStyle(
-                color: Theme.of(context).textTheme.bodyLarge?.color ??
-                      Colors.black,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            centerTitle: true,
             bottom: TabBar(
               controller: _tabController,
               tabs: const [

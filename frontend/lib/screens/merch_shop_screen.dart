@@ -1,8 +1,12 @@
+import 'package:dashbaord/extensions.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/merch_item_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/screens/merch_details_screen.dart';
 import 'package:dashbaord/screens/merch_orders_screen.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/cupertino.dart';
 
 class MerchShopScreen extends StatefulWidget {
   const MerchShopScreen({Key? key}) : super(key: key);
@@ -45,12 +49,15 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final textColor =
+        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Merchandise Shop'),
+      appBar: CustomAppBar(
+        title: 'Merchandise',
         actions: [
           IconButton(
-            icon: const Icon(Icons.history),
+            icon: Icon(Icons.history),
             onPressed: () {
               Navigator.push(
                 context,
@@ -113,7 +120,7 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
 
   Widget _buildMerchItemCard(MerchItem item) {
     bool isAvailable = item.deadline.isAfter(DateTime.now());
-    
+
     return GestureDetector(
       onTap: () {
         Navigator.push(

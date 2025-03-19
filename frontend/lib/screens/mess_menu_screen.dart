@@ -2,6 +2,7 @@ import 'package:dashbaord/constants/admins.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/services/analytics_service.dart';
@@ -114,28 +115,8 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
     return isLoading
         ? CustomLoadingScreen()
         : Scaffold(
-            appBar: AppBar(
-              title: Text('Mess Menu',
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  )),
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  // color: Colors.black,
-                  size: 30.0,
-                ),
-                onPressed: () {
-                  // Navigator.pop(context);
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/');
-                  }
-                },
-              ),
+            appBar: CustomAppBar(
+              title: 'Mess Menu'
             ),
             body: SafeArea(
               child: Column(

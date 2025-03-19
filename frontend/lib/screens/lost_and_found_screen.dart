@@ -1,6 +1,7 @@
 import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:dashbaord/widgets/notif_perm.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/lost_and_found_model.dart';
@@ -259,13 +260,8 @@ class _LostAndFoundScreenState extends State<LostAndFoundScreen> {
                   );
                 },
               ),
-              appBar: AppBar(
-                title: BoldText(
-                  text: 'Lost and Found',
-                  color: Theme.of(context).textTheme.bodyLarge?.color ??
-                      Colors.black,
-                  size: 28,
-                ),
+              appBar: CustomAppBar(
+                title: 'Lost and Found',
                 actions: [
                   PopupMenuButton<int>(
                     onSelected: (value) {

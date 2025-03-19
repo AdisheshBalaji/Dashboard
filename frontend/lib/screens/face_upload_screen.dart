@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:dashbaord/services/api_service.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
@@ -139,7 +140,7 @@ class _FaceUploadScreenState extends State<FaceUploadScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Take a Selfie')),
+      appBar: CustomAppBar(title: 'Take a Selfie'),
       body: Center(
         child: !_isCameraPermissionGranted 
         ? Column(

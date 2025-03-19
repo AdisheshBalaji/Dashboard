@@ -1,3 +1,4 @@
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -10,7 +11,7 @@ class CommunityScreen extends StatefulWidget {
 
 class _CommunityScreenState extends State<CommunityScreen> {
   late final WebViewController controller;
-  
+
   final String userAgent =
       "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Mobile Safari/537.36";
@@ -27,16 +28,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'IITH Community',
-          style: TextStyle(
-            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: true,
+      appBar: CustomAppBar(
+        title: 'IITH Community',
       ),
       body: WebViewWidget(controller: controller),
     );
