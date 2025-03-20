@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 
 class CustomSearchBar extends StatefulWidget {
@@ -72,6 +73,8 @@ class _CustomSearchBarState extends State<CustomSearchBar>
             child: TextField(
               controller: _controller,
               focusNode: _focusNode,
+              cursorColor: context.customColors.customAccentColor,
+              textAlignVertical: TextAlignVertical.center,
               decoration: InputDecoration(
                 suffixIcon: IconButton(
                   icon: Icon(Icons.search, color: Colors.grey[400]),

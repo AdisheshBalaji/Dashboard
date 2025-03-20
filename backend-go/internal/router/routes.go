@@ -100,6 +100,7 @@ func SetupRoutes(router *gin.Engine) {
 	router.GET("/announcements", controller.GetAnnouncements)
 	router.Static("/announcements/images", "announcementImages/")
 	router.POST("/announcements", controller.PostAnnouncement)
+	router.GET("/announcements/filters", controller.GetAnnouncementsFilters)
 
 	cabshareGroup := router.Group("/cabshare")
 	{
