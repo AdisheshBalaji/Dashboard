@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/utils/bus_schedule.dart';
 import 'package:dashbaord/widgets/bus_timing_list_widget.dart';
@@ -75,28 +76,8 @@ class _BusTimingsScreenState extends State<BusTimingsScreen> {
     return isLoading
         ? CustomLoadingScreen()
         : Scaffold(
-            appBar: AppBar(
-              title: Text('Bus Timings',
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  )),
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  // color: textColor,
-                  size: 30.0,
-                ),
-                onPressed: () {
-                  // Navigator.pop(context);
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/');
-                  }
-                },
-              ),
+            appBar: CustomAppBar(
+              title: 'Bus Timings',
             ),
             body: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

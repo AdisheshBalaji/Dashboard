@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -18,8 +19,9 @@ type LfResponse struct {
 	ID              int      `json:"id"`
 	ItemName        string   `json:"item_name"`
 	ItemDescription string   `json:"item_description"`
-	UserID          int      `json:"user_id"`
-	Images          []string `json:"images"`
+	UserName        string   `json:"username"`
+	UserEmail       string   `json:"user_email"`
+	Images          []string `json:"image_urls"`
 	CreatedAt       string   `json:"created_at"`
 	username        string
 	user_email      string
@@ -41,6 +43,7 @@ func AddItemHandler(c *gin.Context) {
 	// Step 2: Get the user ID
 	userId, err := helpers.GetUserID(c)
 	if err != nil {
+		fmt.Println("ERROR IS HERE", err.Error())
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
@@ -111,19 +114,22 @@ func GetAllItemsHandler(c *gin.Context) {
 		imageDict[img.ItemID] = append(imageDict[img.ItemID], img.ImageURL)
 	}
 
-	// Step 4: Construct the response similar to Python (list of dicts with item_id, name, images)
-	var response []map[string]interface{}
+	response := make([]map[string]any, 0, len(items))
+
 	for _, item := range items {
-		itemImages := imageDict[item.ID]
-		itemData := map[string]interface{}{
+		images := imageDict[item.ID]
+		if images == nil {
+			images = []string{}
+		}
+
+		itemData := map[string]any{
 			"id":     item.ID,
 			"name":   item.ItemName,
-			"images": itemImages,
+			"images": images,
 		}
 		response = append(response, itemData)
 	}
 
-	// Step 5: Return the response
 	c.JSON(http.StatusOK, response)
 }
 
@@ -162,14 +168,25 @@ func GetItemByIdHandler(c *gin.Context) {
 		imageURLs = append(imageURLs, imageURL)
 	}
 
+	// Check for errors after iterating through rows
+	if err = rows.Err(); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error iterating through image results"})
+		return
+	}
+
+	// Initialize imageURLs as empty slice if nil
+	if imageURLs == nil {
+		imageURLs = []string{}
+	}
+
 	// Step 4: Return the response
 	response := LfResponse{
 		ID:              item.ID,
 		ItemName:        item.ItemName,
 		ItemDescription: item.ItemDescription,
-		UserID:          item.UserID,
+		UserEmail:       item.UserEmail,
+		UserName:        item.UserName,
 		Images:          imageURLs,
-		CreatedAt:       item.CreatedAt,
 		username:        item.UserName,
 	}
 

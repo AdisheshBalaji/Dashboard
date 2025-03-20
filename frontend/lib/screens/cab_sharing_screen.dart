@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/services/shared_service.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:dashbaord/widgets/notif_perm.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/services/analytics_service.dart';
@@ -549,30 +550,8 @@ class _CabSharingScreenState extends State<CabSharingScreen> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Cab Sharing',
-          style: GoogleFonts.inter(
-            fontSize: 28,
-            fontWeight: FontWeight.w700,
-            color: textColor,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            // color: Colors.black,
-            size: 30.0,
-          ),
-          onPressed: () {
-            // Navigator.pop(context);
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/home');
-            }
-          },
-        ),
+      appBar: CustomAppBar(
+        title: 'Cab Sharing',
       ),
       floatingActionButton: isTabOneSelected
           ? Container()

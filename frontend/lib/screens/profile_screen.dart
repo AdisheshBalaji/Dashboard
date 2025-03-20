@@ -7,6 +7,7 @@ import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/event_notification_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
 import 'package:dashbaord/utils/loading_widget.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:dashbaord/widgets/profile/notification_settings_sheet.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -263,29 +264,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ? CustomLoadingScreen()
         : Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            appBar: AppBar(
+            appBar: CustomAppBar(
               // backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              title: Text('Profile',
-                  style: GoogleFonts.inter(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w700,
-                    color: textColor,
-                  )),
-              leading: IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  // color: textColor,
-                  size: 30.0,
-                ),
-                onPressed: () {
-                  if (context.canPop()) {
-                    context.pop();
-                  } else {
-                    context.go('/home');
-                  }
-                  // Navigator.pop(context);
-                },
-              ),
+              title: 'Profile',
             ),
             body: Stack(
               children: [

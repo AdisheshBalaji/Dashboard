@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
+from enum import Enum
+from datetime import date
 
 
 class Course(BaseModel):

@@ -414,7 +414,7 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               child: Text(
                 'No',
-                style: TextStyle(color: Colors.redAccent, fontSize: 16),
+                style: TextStyle(color: Colors.red, fontSize: 16),
               ),
             ),
             TextButton(
@@ -756,6 +756,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                         title: 'Merch',
                                         child: 'assets/icons/merch.svg',
                                         onTap: () {
+                                          context.push("/merch");
+                                          return;
                                           if (widget.isGuest) {
                                             showError();
                                           } else {
