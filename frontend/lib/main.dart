@@ -134,7 +134,8 @@ class _MyAppState extends State<MyApp> {
         AndroidNotificationDetails('dashboard-channel',
             'IITH Dashboard Channel', // TODO: later use good channel id and names [like differnt for each type of notification]
             importance: Importance.max,
-            priority: Priority.high);
+            priority: Priority.high,
+            icon: 'ic_notification');
 
     const DarwinNotificationDetails iOSPlatformChannelSpecifics =
         DarwinNotificationDetails();

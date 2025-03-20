@@ -39,6 +39,7 @@ class EventNotificationService {
         channelDescription: 'Notifications for upcoming classes',
         importance: Importance.max,
         priority: Priority.high,
+        icon: 'ic_notification',
       );
 
       const DarwinNotificationDetails iOSPlatformChannelSpecifics =
