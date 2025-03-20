@@ -31,7 +31,7 @@ def get_all_fcm_tokens(test = True):
     """Fetches all FCM tokens from the database."""
     tokens = []
     if test:
-        query = "SELECT fcm.token, u.name FROM fcm_tokens fcm JOIN users u ON fcm.user_id = u.id where u.id in (1, 41, 232)"
+        query = "SELECT fcm.token, u.name FROM fcm_tokens fcm JOIN users u ON fcm.user_id = u.id where u.id in (1, 41)"
     else: 
         query = "SELECT fcm.token, u.name FROM fcm_tokens fcm JOIN users u ON fcm.user_id = u.id"
 
