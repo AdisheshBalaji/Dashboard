@@ -60,7 +60,7 @@ class _CustomSearchBarState extends State<CustomSearchBar>
     return Row(
       children: [
         AnimatedContainer(
-          duration: Duration(milliseconds: 300),
+          duration: Duration(milliseconds: 200),
           width: _isSearching ? MediaQuery.of(context).size.width - 78 : MediaQuery.of(context).size.width - 40,
           curve: Curves.easeInOut,
           child: Container(

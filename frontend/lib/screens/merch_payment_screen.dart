@@ -375,25 +375,39 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                     _buildSectionHeader(
                         context, 'Merch Information', Icons.person_outline),
                     const SizedBox(height: 16),
-                    CustomTextField(controller: _nameController, label: 'Display Name'),
+                    CustomTextField(
+                        controller: _nameController, label: 'Display Name'),
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                         context, 'Payment Details', Icons.payment_outlined),
                     const SizedBox(height: 16),
                     Card(
-                      color: theme.cardColor,
+                      color: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.color
+                          ?.withOpacity(0.1),
+                      shadowColor: Theme.of(context)
+                          .textTheme
+                          .bodyLarge
+                          ?.color
+                          ?.withOpacity(0.0),
+                      margin: EdgeInsets.all(0),
                       child: Padding(
-                        padding: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.symmetric(vertical: 8, horizontal:16),
                         child: Row(
                           children: [
                             Expanded(
                               child: Text(
                                 widget.item.upiId,
                                 style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: theme.textTheme.bodyLarge!.color,
-                                ),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge
+                                        ?.color
+                                        ?.withOpacity(0.9)),
                               ),
                             ),
                             IconButton(
@@ -422,9 +436,12 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                       ),
                     ),
                     const SizedBox(height: 24),
-                    CustomTextField(controller: _upiIdController, label: 'Your UPI ID'),
+                    CustomTextField(
+                        controller: _upiIdController, label: 'Your UPI ID'),
                     const SizedBox(height: 16),
-                    CustomTextField(controller: _transactionIdController, label: 'Transaction ID'),
+                    CustomTextField(
+                        controller: _transactionIdController,
+                        label: 'Transaction ID'),
                     const SizedBox(height: 12),
                     Row(
                       children: [

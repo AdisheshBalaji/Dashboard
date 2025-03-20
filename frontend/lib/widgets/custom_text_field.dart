@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -14,11 +15,11 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: TextFormField(
+      child: TextField(
         controller: controller,
+          cursorColor: context.customColors.customAccentColor,
         decoration: InputDecoration(
           hintText: label,
-        labelText: label,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           filled: true,
           fillColor: Theme.of(context).textTheme.bodyLarge?.color?.withOpacity(0.1),

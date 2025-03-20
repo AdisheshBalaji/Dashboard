@@ -1,10 +1,11 @@
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/merch_order_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:intl/intl.dart';
 
 class MerchOrdersScreen extends StatefulWidget {
-  const MerchOrdersScreen({Key? key}) : super(key: key);
+  const MerchOrdersScreen({super.key});
 
   @override
   State<MerchOrdersScreen> createState() => _MerchOrdersScreenState();
@@ -45,16 +46,16 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Orders'),
-      ),
+      appBar: CustomAppBar(title: 'My Orders'),
       body: _buildBody(),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     if (_errorMessage != null) {
@@ -62,9 +63,12 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+            Text(
+              _errorMessage!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
             const SizedBox(height: 16),
-            ElevatedButton(
+            FilledButton(
               onPressed: _loadOrders,
               child: const Text('Retry'),
             ),
@@ -75,23 +79,48 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
 
     if (_orders.isEmpty) {
       return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.shopping_bag_outlined, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'No orders yet',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text('Items you purchase will appear here'),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Browse Merchandise'),
-            ),
-          ],
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.shopping_bag_outlined,
+                size: 80,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'No orders yet',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: -0.5,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Items you purchase will appear here',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              FilledButton.tonal(
+                onPressed: () => Navigator.pop(context),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 12,
+                  ),
+                ),
+                child: const Text('Browse Merchandise'),
+              ),
+            ],
+          ),
         ),
       );
     }
@@ -99,7 +128,7 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
     return RefreshIndicator(
       onRefresh: _loadOrders,
       child: ListView.builder(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
         itemCount: _orders.length,
         itemBuilder: (context, index) {
           final order = _orders[index];
@@ -112,11 +141,16 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
   Widget _buildOrderCard(MerchOrder order) {
     final dateFormatter = DateFormat('MMM d, yyyy');
     final formattedDate = dateFormatter.format(order.orderDate);
-    
+
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      color: Theme.of(context).cardColor,
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 0.5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -124,81 +158,123 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(12),
                   child: Image.network(
                     order.imageUrl,
-                    height: 80,
-                    width: 80,
+                    height: 90,
+                    width: 90,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        height: 80,
-                        width: 80,
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.error),
+                        height: 90,
+                        width: 90,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Icons.image_not_supported_outlined,
+                          size: 30,
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                        ),
                       );
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: 20),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         order.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 18,
+                          letterSpacing: -0.5,
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text('Size: ${order.size}'),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Size: ${order.size}',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                          fontSize: 15,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
                       Text(
                         '₹${order.price.toStringAsFixed(2)}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Theme.of(context).textTheme.bodyLarge!.color,
+                        ),
                       ),
                     ],
                   ),
                 ),
               ],
             ),
-            const Divider(height: 24),
+            Divider(
+              height: 32, 
+              thickness: 1,
+              color: Theme.of(context).dividerColor,
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    Text(
                       'Order Date',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
                     ),
-                    Text(formattedDate),
+                    const SizedBox(height: 4),
+                    Text(
+                      formattedDate,
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    const Text(
+                    Text(
                       'Status',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        fontSize: 13,
+                      ),
                     ),
+                    const SizedBox(height: 4),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
+                        horizontal: 12,
+                        vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                        color: order.status ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        order.status ? 'Completed' : 'Pending',
-                        style: TextStyle(
-                          color: order.status ? Colors.green : Colors.orange,
+                          color: order.status
+                              ? const Color(0xFF00A878).withAlpha(25)
+                              : const Color(0xFFFFA500).withAlpha(25),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          order.status ? 'Completed' : 'Pending',
+                          style: TextStyle(
+                              color: order.status 
+                              ? const Color(0xFF00A878) 
+                              : const Color(0xFFFFA500), 
                           fontWeight: FontWeight.bold,
+                          fontSize: 14,
                         ),
                       ),
                     ),
@@ -206,39 +282,62 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             ExpansionTile(
-              title: const Text('Order Details'),
+              title: Text(
+                'Order Details',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
               tilePadding: EdgeInsets.zero,
+              childrenPadding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 8,
+              ),
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+                side: BorderSide(
+                  color: Colors.transparent,
+                ),
+              ),
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Order ID:'),
-                    Text('#${order.id}'),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Transaction ID:'),
-                    Text(order.transactionId),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Name:'),
-                    Text(order.displayName),
-                  ],
-                ),
+                _buildDetailRow('Order ID:', '#${order.id}'),
+                const SizedBox(height: 12),
+                _buildDetailRow('Transaction ID:', order.transactionId),
+                const SizedBox(height: 12),
+                _buildDetailRow('Name:', order.displayName),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+            fontSize: 15,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 15,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
+        ),
+      ],
     );
   }
 }
