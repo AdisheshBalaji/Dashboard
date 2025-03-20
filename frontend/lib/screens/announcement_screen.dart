@@ -323,6 +323,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                     children: _highlightedFilterOptions.map((category) {
                                       final isSelected = _selectedChipIndex ==
                                           _highlightedFilterOptions.indexOf(category);
+
                                       return FilterChip(
                                         label: Text(category),
                                         selected: isSelected,
@@ -458,6 +459,12 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                   return const SizedBox.shrink();
                 }
               }
+              if (!selectedTags.contains('All')) {
+                if (!announcement.tags.any((element) => selectedTags.contains(element))) {
+                  return const SizedBox.shrink();
+                }
+              }
+
               return AnnouncementCard(
                 image: announcement.imageUrl,
                 source: announcement.createdBy,
