@@ -116,4 +116,12 @@ func SetupRoutes(router *gin.Engine) {
 		cabshareGroup.DELETE("/bookings/:booking_id", middlewares.AuthMiddleware(), controller.DeleteExistingBooking)
 		cabshareGroup.DELETE("/bookings/:booking_id/self", middlewares.AuthMiddleware(), controller.ExitBooking)
 	}
+
+	api := router.Group("/merch")
+	{
+		api.GET("/items", middlewares.AuthMiddleware(), controller.GetItems)
+		api.GET("/items/:item_id", middlewares.AuthMiddleware(), controller.GetItem)
+		api.POST("/order", middlewares.AuthMiddleware(), controller.CreateOrder)
+		api.GET("/orders", middlewares.AuthMiddleware(), controller.GetUserOrders)
+	}
 }

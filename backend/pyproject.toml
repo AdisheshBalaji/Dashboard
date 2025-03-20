@@ -28,6 +28,7 @@ aiosql = "^10.2"
 gunicorn = "^22.0.0"
 pytz = "^2024.1"
 regex = "^2024.11.6"
+firebase-admin = "^6.7.0"
 
 
 

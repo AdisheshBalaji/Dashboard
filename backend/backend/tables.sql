@@ -213,36 +213,69 @@ CREATE TABLE IF NOT EXISTS face
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS merch
+(
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description VARCHAR(1024),
+    deadline TIMESTAMP NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    image_url VARCHAR(256) NOT NULL,
+    upi_id VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS merch_images (
+    id SERIAL PRIMARY KEY,
+    merch_id INTEGER NOT NULL REFERENCES merch(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TYPE merch_size AS ENUM ('S', 'M', 'L', 'XL', 'XXL');
+
+CREATE TABLE IF NOT EXISTS orders
+(
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    merch_id BIGINT NOT NULL REFERENCES merch(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    status BOOLEAN NOT NULL,
+    order_date DATE NOT NULL,
+    size merch_size NOT NULL,
+    transaction_id TEXT NOT NULL,
+    display_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
 CREATE TABLE lambdaverse_registrations (
     id SERIAL PRIMARY KEY,
-    
+
     -- Personal Information
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
     institution VARCHAR(255) NOT NULL,
     role VARCHAR(50) NOT NULL CHECK (role IN ('student', 'professional', 'faculty', 'other')),
-    
+
     -- Registration Metadata
     source VARCHAR(100) CHECK (source IN ('social', 'friend', 'email', 'website', 'event', 'other', NULL)),
     registration_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-    
+
     -- Interests Data (stored as an array)
     interests TEXT[] NOT NULL DEFAULT '{}',
-    
+
     -- Status and Attendance Tracking
-    status VARCHAR(50) NOT NULL DEFAULT 'registered' 
+    status VARCHAR(50) NOT NULL DEFAULT 'registered'
         CHECK (status IN ('registered', 'confirmed', 'attended', 'cancelled', 'no-show')),
     confirmation_date TIMESTAMP WITH TIME ZONE,
 
     -- Additional Metadata
     user_agent TEXT,
     ip_address VARCHAR(45),
-    
+
     -- Notes and Administrative Info
     notes TEXT,
     updated_at TIMESTAMP WITH TIME ZONE,
-    
+
     -- Constraints
     CONSTRAINT unique_email UNIQUE (email)
 );

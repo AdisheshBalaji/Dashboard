@@ -2,6 +2,7 @@ import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/services/shared_service.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:dashbaord/widgets/notif_perm.dart';
 import 'package:dashbaord/widgets/timetable/add_lectures_sheet.dart';
 import 'package:dashbaord/widgets/timetable/day_view.dart';
@@ -107,26 +108,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
     return CalendarControllerProvider(
       controller: EventController()..addAll(_events),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(
+        appBar: CustomAppBar(
+          title: 
             "Calendar",
-            style: GoogleFonts.inter(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              color:
-                  Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-            ),
-          ),
-          leadingWidth: 65,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back,
-              size: 30.0,
-            ),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
           actions: [
             PopupMenuButton<String>(
               onSelected: (value) async {
