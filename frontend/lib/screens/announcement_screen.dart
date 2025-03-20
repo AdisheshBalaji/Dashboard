@@ -35,12 +35,17 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     'Tag D',
   ];
   List<String> selectedTags = ['All'];
+
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  final GlobalKey _bottomKey = GlobalKey();
 
   int _selectedChipIndex = 0;
   int _filterOptionChipIndex = 0;
   int limit = 10;
   int offset = 0;
+  double _bottomHeight = 60.0;
+  bool isSearching = false;
   bool isLoading = false;
   bool loadedAll = false;
   bool isFilterOpen = false;
@@ -101,6 +106,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
         fetchAnnouncements();
       }
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) => _updateHeight());
   }
 
   @override
@@ -114,10 +121,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            size: 30.0,
-          ),
+          icon: Icon(Icons.arrow_back),
           onPressed: () {
             if (context.canPop()) {
               context.pop();
@@ -126,34 +130,49 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
             }
           },
         ),
-        title: Text(
-          'Announcements',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-          ),
-        ),
+        title: isSearching
+            ? TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  border: InputBorder.none,
+                ),
+                style: TextStyle(
+                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+                ),
+                autofocus: true,
+              )
+            : Text(
+                'Announcements',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+                ),
+              ),
         actions: [
           IconButton(
-            icon: const Icon(
-              Icons.search,
+            icon: Icon(
+              isSearching ? Icons.close : Icons.search,
               size: 30.0,
             ),
             onPressed: () {
-              print("Search button pressed");
+              setState(() {
+                isSearching = !isSearching;
+              });
             },
           ),
         ],
         bottom: PreferredSize(
           preferredSize: Size.fromHeight(
-            (_filterOptionChipIndex == 3) ? 540 : 60,
+            _bottomHeight,
           ),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final screenWidth = constraints.maxWidth;
 
               return Column(
+                key: _bottomKey,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Row(
@@ -175,6 +194,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                     setState(() {
                                       _filterOptionChipIndex = selected ? index : 0;
                                     });
+                                    _updateHeight();
                                   },
                                   selectedColor: const Color.fromRGBO(237, 90, 36, 1),
                                   showCheckmark: false,
@@ -234,6 +254,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                     _selectedChipIndex ==
                                         _highlightedFilterOptions.indexOf(category);
                                   });
+                                  _updateHeight();
                                 },
                                 backgroundColor: const Color(0xFF2A2A2A),
                                 selectedColor: const Color(0xFFFF5722),
@@ -292,6 +313,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                               selectedTags = ['All'];
                                             }
                                           }
+                                          _updateHeight();
                                         });
                                       },
                                       backgroundColor: const Color(0xFF2A2A2A),
@@ -316,7 +338,11 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         Center(
                           child: GestureDetector(
                             onTap: () {
-                              // Close filters
+                              setState(() {
+                                _filterOptionChipIndex = 0;
+                              });
+
+                              _updateHeight();
                             },
                             child: Container(
                               margin: const EdgeInsets.symmetric(vertical: 16),
@@ -369,6 +395,17 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
         },
       ),
     );
-    // );
+  }
+
+  void _updateHeight() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final keyContext = _bottomKey.currentContext;
+      if (keyContext != null) {
+        final box = keyContext.findRenderObject() as RenderBox;
+        setState(() {
+          _bottomHeight = box.size.height;
+        });
+      }
+    });
   }
 }
