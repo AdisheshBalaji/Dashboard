@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:go_router/go_router.dart';
 
 class AnnouncementScreen extends StatefulWidget {
   const AnnouncementScreen({super.key});
@@ -103,8 +102,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     fetchAnnouncements();
     _searchFocusNode = FocusNode();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels ==
-          _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
         fetchAnnouncements();
       }
     });
@@ -171,11 +169,9 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         },
                       ),
                       hintText: "Search",
-                      hintStyle:
-                          TextStyle(color: Colors.grey[400], fontSize: 15),
+                      hintStyle: TextStyle(color: Colors.grey[400], fontSize: 15),
                       border: InputBorder.none,
                     ),
-                    // onSubmitted: onSearch,
                     onChanged: (value) {
                       setState(() {});
                     },
@@ -187,8 +183,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 style: GoogleFonts.outfit(
                   fontSize: 25.0,
                   fontWeight: FontWeight.w600,
-                  color: Theme.of(context).textTheme.bodyLarge?.color ??
-                      Colors.white,
+                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
                 ),
               ),
         actions: [
@@ -241,8 +236,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                             selectedColor: const Color.fromRGBO(237, 90, 36, 1),
                             showCheckmark: false,
                             labelStyle: const TextStyle(color: Colors.white),
-                            backgroundColor:
-                                const Color.fromRGBO(48, 48, 48, 1),
+                            backgroundColor: const Color.fromRGBO(48, 48, 48, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -285,8 +279,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                         child: DecoratedBox(
                             decoration: BoxDecoration(
                               color: const Color(0xFF1E1E1E),
-                              borderRadius: const BorderRadius.vertical(
-                                  bottom: Radius.circular(16)),
+                              borderRadius:
+                                  const BorderRadius.vertical(bottom: Radius.circular(16)),
                               boxShadow: [
                                 BoxShadow(
                                   color: Colors.black.withOpacity(0.2),
@@ -322,42 +316,34 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                 ),
                                 const SizedBox(height: 12),
                                 Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 20.0),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
                                   child: Wrap(
                                     spacing: 8,
                                     runSpacing: 8,
-                                    children: _highlightedFilterOptions
-                                        .map((category) {
+                                    children: _highlightedFilterOptions.map((category) {
                                       final isSelected = _selectedChipIndex ==
-                                          _highlightedFilterOptions
-                                              .indexOf(category);
+                                          _highlightedFilterOptions.indexOf(category);
                                       return FilterChip(
                                         label: Text(category),
                                         selected: isSelected,
                                         onSelected: (selected) {
                                           setState(() {
                                             _selectedChipIndex =
-                                                _highlightedFilterOptions
-                                                    .indexOf(category);
+                                                _highlightedFilterOptions.indexOf(category);
                                           });
                                         },
-                                        backgroundColor:
-                                            const Color(0xFF2A2A2A),
+                                        backgroundColor: const Color(0xFF2A2A2A),
                                         selectedColor: const Color(0xFFFF5722),
                                         checkmarkColor: Colors.transparent,
                                         showCheckmark: false,
                                         labelStyle: TextStyle(
-                                          color: isSelected
-                                              ? Colors.white
-                                              : Colors.white70,
+                                          color: isSelected ? Colors.white : Colors.white70,
                                         ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 8, vertical: 2),
+                                        padding:
+                                            const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                       );
                                     }).toList(),
                                   ),
@@ -380,14 +366,12 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                     behavior: CustomScrollBehavior(),
                                     child: SingleChildScrollView(
                                       child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 20.0),
+                                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
                                         child: Wrap(
                                           spacing: 8,
                                           runSpacing: 8,
                                           children: tags.map((tag) {
-                                            final isSelected =
-                                                selectedTags.contains(tag);
+                                            final isSelected = selectedTags.contains(tag);
                                             return FilterChip(
                                               label: Text(tag),
                                               selected: isSelected,
@@ -408,26 +392,18 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                                   }
                                                 });
                                               },
-                                              backgroundColor:
-                                                  const Color(0xFF2A2A2A),
-                                              selectedColor:
-                                                  const Color(0xFFFF5722),
-                                              checkmarkColor:
-                                                  Colors.transparent,
+                                              backgroundColor: const Color(0xFF2A2A2A),
+                                              selectedColor: const Color(0xFFFF5722),
+                                              checkmarkColor: Colors.transparent,
                                               showCheckmark: false,
                                               labelStyle: TextStyle(
-                                                color: isSelected
-                                                    ? Colors.white
-                                                    : Colors.white70,
+                                                color: isSelected ? Colors.white : Colors.white70,
                                               ),
                                               shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
+                                                borderRadius: BorderRadius.circular(20),
                                               ),
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical: 2),
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 8, vertical: 2),
                                             );
                                           }).toList(),
                                         ),
@@ -443,8 +419,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                                       });
                                     },
                                     child: Container(
-                                      margin: const EdgeInsets.symmetric(
-                                          vertical: 16),
+                                      margin: const EdgeInsets.symmetric(vertical: 16),
                                       padding: const EdgeInsets.all(12),
                                       child: const Icon(
                                         Icons.close,
@@ -479,8 +454,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
             if (index < announcements.length) {
               final announcement = announcements[index];
               if (_highlightedFilterOptions[_selectedChipIndex] != 'All') {
-                if (!announcement.tags
-                    .contains(_highlightedFilterOptions[_selectedChipIndex])) {
+                if (!announcement.tags.contains(_highlightedFilterOptions[_selectedChipIndex])) {
                   return const SizedBox.shrink();
                 }
               }
@@ -491,6 +465,7 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                 title: announcement.title,
                 description: announcement.description,
                 tags: announcement.tags,
+                id: announcement.id,
               );
             } else if (isLoading) {
               return Center(
