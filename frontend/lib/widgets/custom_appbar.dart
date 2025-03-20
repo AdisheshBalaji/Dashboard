@@ -22,8 +22,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       leadingWidth: 40,
       leading: Padding(
-        padding:
-            const EdgeInsets.only(left: 12.0),
+        padding: const EdgeInsets.only(left: 12.0),
         child: IconButton(
           icon: Icon(
             CupertinoIcons.back,
@@ -34,28 +33,21 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      title: Padding(
-        padding: const EdgeInsets.only(
-            left: 8.0),
-        child: Text(
-          title,
-          style: GoogleFonts.outfit(
-            fontSize: 25.0,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.bodyLarge?.color ??
-                Colors.white,
-          ),
+      title: Text(
+        title,
+        style: GoogleFonts.outfit(
+          fontSize: 25.0,
+          fontWeight: FontWeight.w600,
+          color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.white,
         ),
       ),
       actions: actions,
       bottom: bottom ??
-          PreferredSize(
-              preferredSize: Size.zero,
-              child: SizedBox.shrink()),
+          PreferredSize(preferredSize: Size.zero, child: SizedBox.shrink()),
     );
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight +
-      (bottom?.preferredSize.height ?? 0));
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 }

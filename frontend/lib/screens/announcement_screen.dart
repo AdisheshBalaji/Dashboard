@@ -1,8 +1,11 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/announcement_model.dart';
 import 'package:dashbaord/widgets/announcement_card.dart';
 import 'package:dashbaord/widgets/announcement_scroll_bar.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/services/api_service.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:go_router/go_router.dart';
 
@@ -16,7 +19,7 @@ class AnnouncementScreen extends StatefulWidget {
 class _AnnouncementScreenState extends State<AnnouncementScreen> {
   final ApiServices apiServices = ApiServices();
   List<String> _highlightedFilterOptions = ['All'];
-  final List<String> _filterOptions = ['All', 'Unread', 'Important', 'More Filters...'];
+  final List<String> _filterOptions = ['All', 'Unread', 'Important'];
   final List<String> tags = [
     'All',
     'Courses',
@@ -46,6 +49,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   bool isSearching = false;
   bool isLoading = false;
   bool loadedAll = false;
+  bool _isFilterExpanded = false;
+  late FocusNode _searchFocusNode;
   List<AnnouncementModel> announcements = [];
 
   void showError({String? msg}) {
@@ -96,9 +101,10 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   void initState() {
     super.initState();
     fetchAnnouncements();
-
+    _searchFocusNode = FocusNode();
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
         fetchAnnouncements();
       }
     });
@@ -108,13 +114,14 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
   void dispose() {
     _scrollController.dispose();
     _searchController.dispose();
+    _searchFocusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     const double topChipsHeight = 60.0;
-    double extraHeight = (_filterOptionChipIndex == 3) ? 487.0 : 0;
+    double extraHeight = (_isFilterExpanded) ? 487.0 : 0;
     final double appBarBottomHeight = topChipsHeight + extraHeight;
     final double totalAppBarHeight = kToolbarHeight + appBarBottomHeight;
     final double appBarBottomMaxHeight = topChipsHeight + extraHeight;
@@ -122,47 +129,87 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/');
-            }
-          },
+        backgroundColor: Theme.of(context).canvasColor,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 12.0),
+          child: IconButton(
+            icon: Icon(
+              CupertinoIcons.back,
+              color: context.customColors.customAccentColor,
+              size: 28,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
         ),
+        centerTitle: true,
+        leadingWidth: isSearching ? 0 : 20,
         title: isSearching
-            ? TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  hintText: 'Search...',
-                  border: InputBorder.none,
+            ? AnimatedContainer(
+                duration: Duration(milliseconds: 300),
+                width: isSearching
+                    ? MediaQuery.of(context).size.width - 78
+                    : MediaQuery.of(context).size.width - 40,
+                curve: Curves.easeInOut,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF333333),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.fromLTRB(8, 0, 2, 0),
+                  child: TextField(
+                    cursorColor: context.customColors.customAccentColor,
+                    controller: _searchController,
+                    focusNode: _searchFocusNode,
+                    textAlignVertical: TextAlignVertical.center,
+                    decoration: InputDecoration(
+                      suffixIcon: IconButton(
+                        icon: Icon(Icons.search, color: Colors.grey[400]),
+                        onPressed: () {
+                          setState(() {
+                            isSearching = !isSearching;
+                          });
+                        },
+                      ),
+                      hintText: "Search",
+                      hintStyle:
+                          TextStyle(color: Colors.grey[400], fontSize: 15),
+                      border: InputBorder.none,
+                    ),
+                    // onSubmitted: onSearch,
+                    onChanged: (value) {
+                      setState(() {});
+                    },
+                  ),
                 ),
-                style: TextStyle(
-                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-                ),
-                autofocus: true,
               )
             : Text(
-                'Announcements',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
+                "Announcements",
+                style: GoogleFonts.outfit(
+                  fontSize: 25.0,
+                  fontWeight: FontWeight.w600,
+                  color: Theme.of(context).textTheme.bodyLarge?.color ??
+                      Colors.white,
                 ),
               ),
         actions: [
-          IconButton(
-            icon: Icon(
-              isSearching ? Icons.close : Icons.search,
-              size: 30.0,
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: IconButton(
+              icon: Icon(
+                isSearching ? Icons.close : Icons.search,
+                color: context.customColors.customAccentColor,
+                size: 28,
+              ),
+              onPressed: () {
+                setState(() {
+                  isSearching = !isSearching;
+                });
+                _searchFocusNode.requestFocus();
+                if (isSearching) {
+                  _searchController.clear();
+                }
+              },
             ),
-            onPressed: () {
-              setState(() {
-                isSearching = !isSearching;
-              });
-            },
           ),
         ],
         bottom: PreferredSize(
@@ -173,10 +220,9 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                SizedBox(
-                  height: topChipsHeight,
-                  width: double.infinity,
-                  child: SingleChildScrollView(
+                Expanded(
+                    child: Row(children: [
+                  SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.fromLTRB(16, 5, 8, 5),
                     child: Row(
@@ -195,7 +241,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                             selectedColor: const Color.fromRGBO(237, 90, 36, 1),
                             showCheckmark: false,
                             labelStyle: const TextStyle(color: Colors.white),
-                            backgroundColor: const Color.fromRGBO(48, 48, 48, 1),
+                            backgroundColor:
+                                const Color.fromRGBO(48, 48, 48, 1),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -204,156 +251,213 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
                       ),
                     ),
                   ),
-                ),
-                AnimatedSize(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  child: SizedBox(
-                    height: _filterOptionChipIndex == 3 ? extraHeight : 0,
-                    child: _filterOptionChipIndex == 3
-                        ? Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 20),
-                              const Center(
-                                child: Text(
-                                  'Filters',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      selected: _isFilterExpanded,
+                      label: Icon(CupertinoIcons.slider_horizontal_3),
+                      onSelected: (bool selected) {
+                        setState(() {
+                          _isFilterExpanded = !_isFilterExpanded;
+                        });
+                      },
+                      selectedColor: const Color.fromRGBO(237, 90, 36, 1),
+                      showCheckmark: false,
+                      labelStyle: const TextStyle(color: Colors.white),
+                      backgroundColor: const Color.fromRGBO(48, 48, 48, 1),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                  ),
+                ])),
+                ClipRect(
+                  child: AnimatedSlide(
+                    offset: Offset(0, _isFilterExpanded ? 0.0 : -1.0),
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOutCubic,
+                    child: AnimatedOpacity(
+                      opacity: _isFilterExpanded ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      child: SizedBox(
+                        height: extraHeight,
+                        child: DecoratedBox(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E1E1E),
+                              borderRadius: const BorderRadius.vertical(
+                                  bottom: Radius.circular(16)),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 20),
+                                const Center(
+                                  child: Text(
+                                    'Filters',
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 20),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 30.0),
-                                child: Text(
-                                  'Categories',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white70,
+                                const SizedBox(height: 20),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 30.0),
+                                  child: Text(
+                                    'Categories',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white70,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                child: Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: _highlightedFilterOptions.map((category) {
-                                    final isSelected = _selectedChipIndex ==
-                                        _highlightedFilterOptions.indexOf(category);
-                                    return FilterChip(
-                                      label: Text(category),
-                                      selected: isSelected,
-                                      onSelected: (selected) {
-                                        setState(() {
-                                          _selectedChipIndex =
-                                              _highlightedFilterOptions.indexOf(category);
-                                        });
-                                      },
-                                      backgroundColor: const Color(0xFF2A2A2A),
-                                      selectedColor: const Color(0xFFFF5722),
-                                      checkmarkColor: Colors.transparent,
-                                      showCheckmark: false,
-                                      labelStyle: TextStyle(
-                                        color: isSelected ? Colors.white : Colors.white70,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      padding:
-                                          const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                    );
-                                  }).toList(),
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                              const Padding(
-                                padding: EdgeInsets.only(left: 30.0),
-                                child: Text(
-                                  'Tags',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white70,
+                                const SizedBox(height: 12),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0),
+                                  child: Wrap(
+                                    spacing: 8,
+                                    runSpacing: 8,
+                                    children: _highlightedFilterOptions
+                                        .map((category) {
+                                      final isSelected = _selectedChipIndex ==
+                                          _highlightedFilterOptions
+                                              .indexOf(category);
+                                      return FilterChip(
+                                        label: Text(category),
+                                        selected: isSelected,
+                                        onSelected: (selected) {
+                                          setState(() {
+                                            _selectedChipIndex =
+                                                _highlightedFilterOptions
+                                                    .indexOf(category);
+                                          });
+                                        },
+                                        backgroundColor:
+                                            const Color(0xFF2A2A2A),
+                                        selectedColor: const Color(0xFFFF5722),
+                                        checkmarkColor: Colors.transparent,
+                                        showCheckmark: false,
+                                        labelStyle: TextStyle(
+                                          color: isSelected
+                                              ? Colors.white
+                                              : Colors.white70,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 8, vertical: 2),
+                                      );
+                                    }).toList(),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              SizedBox(
-                                height: 140,
-                                child: ScrollConfiguration(
-                                  behavior: CustomScrollBehavior(),
-                                  child: SingleChildScrollView(
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                                      child: Wrap(
-                                        spacing: 8,
-                                        runSpacing: 8,
-                                        children: tags.map((tag) {
-                                          final isSelected = selectedTags.contains(tag);
-                                          return FilterChip(
-                                            label: Text(tag),
-                                            selected: isSelected,
-                                            onSelected: (selected) {
-                                              setState(() {
-                                                if (tag == 'All') {
-                                                  selectedTags = ['All'];
-                                                } else {
-                                                  selectedTags.remove('All');
-                                                  if (selected) {
-                                                    selectedTags.add(tag);
-                                                  } else {
-                                                    selectedTags.remove(tag);
-                                                  }
-                                                  if (selectedTags.isEmpty) {
+                                const SizedBox(height: 20),
+                                const Padding(
+                                  padding: EdgeInsets.only(left: 30.0),
+                                  child: Text(
+                                    'Tags',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.white70,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                SizedBox(
+                                  height: 140,
+                                  child: ScrollConfiguration(
+                                    behavior: CustomScrollBehavior(),
+                                    child: SingleChildScrollView(
+                                      child: Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 20.0),
+                                        child: Wrap(
+                                          spacing: 8,
+                                          runSpacing: 8,
+                                          children: tags.map((tag) {
+                                            final isSelected =
+                                                selectedTags.contains(tag);
+                                            return FilterChip(
+                                              label: Text(tag),
+                                              selected: isSelected,
+                                              onSelected: (selected) {
+                                                setState(() {
+                                                  if (tag == 'All') {
                                                     selectedTags = ['All'];
+                                                  } else {
+                                                    selectedTags.remove('All');
+                                                    if (selected) {
+                                                      selectedTags.add(tag);
+                                                    } else {
+                                                      selectedTags.remove(tag);
+                                                    }
+                                                    if (selectedTags.isEmpty) {
+                                                      selectedTags = ['All'];
+                                                    }
                                                   }
-                                                }
-                                              });
-                                            },
-                                            backgroundColor: const Color(0xFF2A2A2A),
-                                            selectedColor: const Color(0xFFFF5722),
-                                            checkmarkColor: Colors.transparent,
-                                            showCheckmark: false,
-                                            labelStyle: TextStyle(
-                                              color: isSelected ? Colors.white : Colors.white70,
-                                            ),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(20),
-                                            ),
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 8, vertical: 2),
-                                          );
-                                        }).toList(),
+                                                });
+                                              },
+                                              backgroundColor:
+                                                  const Color(0xFF2A2A2A),
+                                              selectedColor:
+                                                  const Color(0xFFFF5722),
+                                              checkmarkColor:
+                                                  Colors.transparent,
+                                              showCheckmark: false,
+                                              labelStyle: TextStyle(
+                                                color: isSelected
+                                                    ? Colors.white
+                                                    : Colors.white70,
+                                              ),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 8,
+                                                      vertical: 2),
+                                            );
+                                          }).toList(),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Center(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      _filterOptionChipIndex = 0;
-                                    });
-                                  },
-                                  child: Container(
-                                    margin: const EdgeInsets.symmetric(vertical: 16),
-                                    padding: const EdgeInsets.all(12),
-                                    child: const Icon(
-                                      Icons.close,
-                                      color: Color(0xFFFF5722),
-                                      size: 28,
+                                Center(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      setState(() {
+                                        _isFilterExpanded = false;
+                                      });
+                                    },
+                                    child: Container(
+                                      margin: const EdgeInsets.symmetric(
+                                          vertical: 16),
+                                      padding: const EdgeInsets.all(12),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Color(0xFFFF5722),
+                                        size: 28,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ],
-                          )
-                        : const SizedBox.shrink(),
+                              ],
+                            )),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -375,7 +479,8 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
             if (index < announcements.length) {
               final announcement = announcements[index];
               if (_highlightedFilterOptions[_selectedChipIndex] != 'All') {
-                if (!announcement.tags.contains(_highlightedFilterOptions[_selectedChipIndex])) {
+                if (!announcement.tags
+                    .contains(_highlightedFilterOptions[_selectedChipIndex])) {
                   return const SizedBox.shrink();
                 }
               }
