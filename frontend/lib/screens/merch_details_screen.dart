@@ -1,3 +1,5 @@
+import 'package:dashbaord/extensions.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:dashbaord/models/merch_item_model.dart';
@@ -5,17 +7,20 @@ import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/screens/merch_payment_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:flutter/services.dart';
 
 class MerchItemDetailsScreen extends StatefulWidget {
   final int itemId;
 
-  const MerchItemDetailsScreen({Key? key, required this.itemId}) : super(key: key);
+  const MerchItemDetailsScreen({Key? key, required this.itemId})
+      : super(key: key);
 
   @override
   State<MerchItemDetailsScreen> createState() => _MerchItemDetailsScreenState();
 }
 
-class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
+class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
+    with SingleTickerProviderStateMixin {
   final ApiServices _apiServices = ApiServices();
   MerchItem? _item;
   bool _isLoading = true;
@@ -23,12 +28,24 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
   String _selectedSize = 'M';
   final List<String> _availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
   int _currentImageIndex = 0;
-  final CarouselSliderController _carouselController = CarouselSliderController();
+  final CarouselController _carouselController = CarouselController();
+  late AnimationController _animationController;
+  bool _isDescriptionExpanded = false;
 
   @override
   void initState() {
     super.initState();
     _loadItemDetails();
+    _animationController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadItemDetails() async {
@@ -53,7 +70,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
 
   List<String> _getAllImageUrls() {
     if (_item == null) return [];
-    
+
     List<String> allImages = [_item!.imageUrl];
     allImages.addAll(_item!.images.map((img) => img.url));
     return allImages;
@@ -62,10 +79,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_item?.title ?? 'Item Details'),
-        elevation: 0,
-      ),
+      backgroundColor: Theme.of(context).canvasColor,
       body: _buildBody(),
       bottomNavigationBar: _item != null ? _buildBottomBar() : null,
     );
@@ -73,16 +87,20 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
 
   Widget _buildImageCarousel() {
     final List<String> imageUrls = _getAllImageUrls();
-    
-    return Column(
+
+    return Stack(
       children: [
         CarouselSlider(
-          carouselController: _carouselController,
+          // carouselController: _carouselController,
           options: CarouselOptions(
-            height: MediaQuery.of(context).size.height * 0.4,
+            height: MediaQuery.of(context).size.height * 0.45,
             viewportFraction: 1.0,
             enlargeCenterPage: false,
             enableInfiniteScroll: imageUrls.length > 1,
+            autoPlay: imageUrls.length > 1,
+            autoPlayInterval: const Duration(seconds: 5),
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            autoPlayCurve: Curves.fastOutSlowIn,
             onPageChanged: (index, reason) {
               setState(() {
                 _currentImageIndex = index;
@@ -92,22 +110,38 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
           items: imageUrls.map((imageUrl) {
             return Builder(
               builder: (BuildContext context) {
-                return Hero(
-                  tag: imageUrl == _item!.imageUrl 
-                      ? 'merch_image_${_item!.id}' 
-                      : 'merch_image_${_item!.id}_${imageUrls.indexOf(imageUrl)}',
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                    placeholder: (context, url) => Container(
-                      color: Colors.grey[200],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (context, url, error) => Container(
-                      color: Colors.grey[200],
-                      child: const Center(
-                        child: Icon(Icons.error, size: 50, color: Colors.grey),
+                return GestureDetector(
+                  onTap: () {
+                    _showFullScreenImage(context, imageUrl);
+                  },
+                  child: Hero(
+                    tag: imageUrl == _item!.imageUrl
+                        ? 'merch_image_${_item!.id}'
+                        : 'merch_image_${_item!.id}_${imageUrls.indexOf(imageUrl)}',
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                      placeholder: (context, url) => Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withOpacity(0.2),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: context.customColors.customAccentColor,
+                          ),
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Container(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surface
+                            .withOpacity(0.2),
+                        child: const Center(
+                          child: Icon(Icons.error_outline,
+                              size: 56, color: Colors.grey),
+                        ),
                       ),
                     ),
                   ),
@@ -116,23 +150,44 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
             );
           }).toList(),
         ),
+
+        // Back button
+        Positioned(
+          top: MediaQuery.of(context).padding.top + 8,
+          left: 16,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
+        ),
+
+        // Image indicators
         if (imageUrls.length > 1)
-          Container(
-            margin: const EdgeInsets.only(top: 10),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: imageUrls.asMap().entries.map((entry) {
                 return GestureDetector(
-                  onTap: () => _carouselController.animateToPage(entry.key),
-                  child: Container(
-                    width: 8.0,
-                    height: 8.0,
+                  // onTap: () => _carouselController.animateToPage(entry.key),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
+                    width: _currentImageIndex == entry.key ? 24.0 : 10.0,
+                    height: 10.0,
                     margin: const EdgeInsets.symmetric(horizontal: 4.0),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(12),
                       color: _currentImageIndex == entry.key
-                          ? Theme.of(context).primaryColor
-                          : Colors.grey.shade300,
+                          ? context.customColors.customAccentColor
+                          : Colors.white.withOpacity(0.6),
                     ),
                   ),
                 );
@@ -143,18 +198,69 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
     );
   }
 
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.black87,
+        pageBuilder: (context, _, __) {
+          return GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              color: Colors.black.withOpacity(0.9),
+              child: Stack(
+                children: [
+                  Center(
+                    child: InteractiveViewer(
+                      minScale: 0.5,
+                      maxScale: 3.0,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    top: MediaQuery.of(context).padding.top + 8,
+                    left: 16,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.5),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.close, color: Colors.white),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildBottomBar() {
-    // Existing bottom bar code remains unchanged
     bool isAvailable = _item!.deadline.isAfter(DateTime.now());
-    
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
             offset: const Offset(0, -5),
           ),
         ],
@@ -163,23 +269,29 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
         child: Row(
           children: [
             Expanded(
+                flex: 2,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'Price',
                     style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
+                      fontSize: 14,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
+                  const SizedBox(height: 4),
                   Text(
                     '₹${_item!.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 24, 
+                    style: TextStyle(
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      color: context.customColors.customAccentColor,
                     ),
                   ),
                 ],
@@ -190,6 +302,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
               child: ElevatedButton(
                 onPressed: isAvailable
                     ? () {
+                        HapticFeedback.mediumImpact();
                         Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -202,20 +315,29 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Theme.of(context).primaryColor,
+                  backgroundColor: isAvailable
+                      ? context.customColors.customAccentColor
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.3),
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  elevation: 2,
+                  elevation: isAvailable ? 4 : 0,
+                  shadowColor: isAvailable
+                      ? context.customColors.customAccentColor.withOpacity(0.4)
+                      : Colors.transparent,
                 ),
                 child: Text(
                   isAvailable ? 'Buy Now' : 'Deadline Passed',
                   style: const TextStyle(
-                    fontSize: 16, 
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: Colors.white,
+                    letterSpacing: 0.5,
                   ),
                 ),
               ),
@@ -228,30 +350,26 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    if (_errorMessage != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 60, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(
-              _errorMessage!,
-              style: const TextStyle(color: Colors.red, fontSize: 16),
-              textAlign: TextAlign.center,
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: CircularProgressIndicator(
+                strokeWidth: 3,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                    context.customColors.customAccentColor),
+              ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton.icon(
-              onPressed: _loadItemDetails,
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            const SizedBox(height: 24),
+            Text(
+              'Loading item details...',
+              style: TextStyle(
+                fontSize: 16,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],
@@ -259,165 +377,579 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen> {
       );
     }
 
-    if (_item == null) {
-      return const Center(child: Text('Item not found'));
+    if (_errorMessage != null) {
+      return _buildErrorView();
     }
 
-    bool isAvailable = _item!.deadline.isAfter(DateTime.now());
+    if (_item == null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.shopping_bag_outlined,
+                size: 80,
+                color:
+                    Theme.of(context).colorScheme.onSurface.withOpacity(0.3)),
+            const SizedBox(height: 24),
+            Text(
+              'Item not found',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return _buildItemDetailView();
+  }
+
+  Widget _buildErrorView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.error.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.error_outline_rounded,
+                  size: 60, color: Theme.of(context).colorScheme.error),
+            ),
+            const SizedBox(height: 28),
+            Text(
+              'Oops! Something went wrong',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onSurface,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              _errorMessage!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                fontSize: 16,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 36),
+            ElevatedButton.icon(
+              onPressed: () {
+                HapticFeedback.mediumImpact();
+                _loadItemDetails();
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Try Again'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(220, 52),
+                backgroundColor: context.customColors.customAccentColor,
+                foregroundColor: Colors.white,
+                elevation: 4,
+                shadowColor:
+                    context.customColors.customAccentColor.withOpacity(0.3),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildItemDetailView() {
+    final bool isAvailable = _item!.deadline.isAfter(DateTime.now());
     final dateFormat = DateFormat('MMM d, y');
 
     return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
       slivers: [
         SliverToBoxAdapter(
           child: _buildImageCarousel(),
         ),
         SliverToBoxAdapter(
-          child: Transform.translate(
-            offset: const Offset(0, -20),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _item!.title,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 16),
-
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isAvailable ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isAvailable ? Colors.green.shade300 : Colors.red.shade300,
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          isAvailable ? Icons.schedule : Icons.cancel_outlined,
-                          size: 18,
-                          color: isAvailable ? Colors.green : Colors.red,
-                        ),
-                        const SizedBox(width: 8),
-                        Flexible(
-                          child: Text(
-                            isAvailable
-                                ? 'Order by: ${dateFormat.format(_item!.deadline)}'
-                                : 'Deadline passed: ${dateFormat.format(_item!.deadline)}',
-                            style: TextStyle(
-                              color: isAvailable ? Colors.green : Colors.red,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  const Text(
-                    'Description',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withOpacity(0.05),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      _item!.description,
-                      style: const TextStyle(fontSize: 16, height: 1.4),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 24),
-                  
-                  const Text(
-                    'Select Size',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: _availableSizes.map((size) {
-                      final isSelected = _selectedSize == size;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        width: 60,
-                        height: 60,
-                        child: Material(
-                          color: isSelected 
-                              ? Theme.of(context).primaryColor 
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(12),
-                          elevation: isSelected ? 2 : 0,
-                          child: InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedSize = size;
-                              });
-                            },
-                            borderRadius: BorderRadius.circular(12),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: isSelected 
-                                      ? Theme.of(context).primaryColor
-                                      : Colors.grey.shade300,
-                                  width: 1,
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                size,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: isSelected 
-                                      ? Colors.white 
-                                      : Colors.black87,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                  
-                  const SizedBox(height: 40),
-                ],
-              ),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(32)),
+            ),
+            // margin: const EdgeInsets.only(top: -20),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildItemHeader(isAvailable, dateFormat),
+                const SizedBox(height: 32),
+                _buildDescriptionSection(),
+                const SizedBox(height: 32),
+                _buildSizeSelectionSection(),
+                // const SizedBox(height: 32),
+                // _buildSpecificationsSection(),
+                const SizedBox(height: 16),
+              ],
             ),
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildItemHeader(bool isAvailable, DateFormat dateFormat) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Text(
+                _item!.title,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  height: 1.2,
+                  letterSpacing: -0.5,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        _buildAvailabilityBadge(isAvailable, dateFormat),
+      ],
+    );
+  }
+
+  Widget _buildAvailabilityBadge(bool isAvailable, DateFormat dateFormat) {
+    final Color baseColor = isAvailable
+        ? context.customColors.customAccentColor
+        : Theme.of(context).colorScheme.error;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: baseColor.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: baseColor.withOpacity(0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            isAvailable ? Icons.access_time_rounded : Icons.event_busy_rounded,
+            size: 20,
+            color: baseColor,
+          ),
+          const SizedBox(width: 12),
+          Flexible(
+            child: Text(
+              isAvailable
+                  ? 'Order before: ${dateFormat.format(_item!.deadline)}'
+                  : 'Deadline passed: ${dateFormat.format(_item!.deadline)}',
+              style: TextStyle(
+                color: baseColor,
+                fontWeight: FontWeight.w600,
+                fontSize: 15,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDescriptionSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.customColors.customAccentColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.description_outlined,
+                size: 22,
+                color: context.customColors.customAccentColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Description',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color:
+                Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedSize(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: Text(
+                  _item!.description,
+                  style: TextStyle(
+                    fontSize: 16,
+                    height: 1.7,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.9),
+                    letterSpacing: 0.1,
+                  ),
+                  maxLines: _isDescriptionExpanded ? null : 4,
+                  overflow:
+                      _isDescriptionExpanded ? null : TextOverflow.ellipsis,
+                ),
+              ),
+              if (_item!.description.length > 100) ...[
+                const SizedBox(height: 16),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _isDescriptionExpanded = !_isDescriptionExpanded;
+                      });
+                      if (_isDescriptionExpanded) {
+                        _animationController.forward();
+                      } else {
+                        _animationController.reverse();
+                      }
+                    },
+                    icon: AnimatedIcon(
+                      icon: AnimatedIcons.menu_close,
+                      progress: _animationController,
+                      size: 18,
+                    ),
+                    label: Text(
+                        _isDescriptionExpanded ? 'Show Less' : 'Read More'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: context.customColors.customAccentColor,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(
+                          color: context.customColors.customAccentColor
+                              .withOpacity(0.2),
+                          width: 1,
+                        ),
+                      ),
+                      textStyle: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSizeSelectionSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color:
+                        context.customColors.customAccentColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Icons.straighten_rounded,
+                    size: 22,
+                    color: context.customColors.customAccentColor,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Select Size',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Theme.of(context).colorScheme.onSurface,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+              ],
+            ),
+            TextButton.icon(
+              onPressed: () {
+                _showSizeGuideDialog();
+              },
+              icon: Icon(
+                Icons.help_outline_rounded,
+                color: context.customColors.customAccentColor,
+                size: 18,
+              ),
+              label: const Text('Size Guide'),
+              style: TextButton.styleFrom(
+                foregroundColor: context.customColors.customAccentColor,
+                textStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+          ],
+        ),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 5,
+            childAspectRatio: 1,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: _availableSizes.length,
+          itemBuilder: (context, index) {
+            final size = _availableSizes[index];
+            final bool isSelected = _selectedSize == size;
+
+            return GestureDetector(
+              onTap: () {
+                HapticFeedback.selectionClick();
+                setState(() => _selectedSize = size);
+              },
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? context.customColors.customAccentColor
+                      : Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected
+                        ? context.customColors.customAccentColor
+                        : Theme.of(context)
+                            .colorScheme
+                            .outline
+                            .withOpacity(0.3),
+                    width: isSelected ? 2 : 1.5,
+                  ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: context.customColors.customAccentColor
+                                .withOpacity(0.25),
+                            blurRadius: 12,
+                            offset: const Offset(0, 4),
+                          )
+                        ]
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  size,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: isSelected
+                        ? Colors.white
+                        : Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  void _showSizeGuideDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        maxChildSize: 0.9,
+        minChildSize: 0.5,
+        builder: (_, scrollController) => Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Size Guide',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                    style: IconButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.surfaceVariant,
+                      shape: const CircleBorder(),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'How to measure yourself',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // TODO: change this
+                      // Image.network(
+                      //   'https://via.placeholder.com/400x300?text=Size+Chart',
+                      //   fit: BoxFit.cover,
+                      //   width: double.infinity,
+                      // ),
+                      // const SizedBox(height: 24),
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.2),
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Table(
+                          border: TableBorder.all(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .outline
+                                .withOpacity(0.2),
+                            width: 1,
+                          ),
+                          children: [
+                            TableRow(
+                              decoration: BoxDecoration(
+                                color: context.customColors.customAccentColor
+                                    .withOpacity(0.1),
+                              ),
+                              children: const [
+                                Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text('Size',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text('Chest (in)',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text('Length (in)',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                              ],
+                            ),
+                            ...['S', 'M', 'L', 'XL', 'XXL'].map((size) {
+                              return TableRow(
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(size),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                        '${36 + _availableSizes.indexOf(size) * 2}-${38 + _availableSizes.indexOf(size) * 2}'),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Text(
+                                        '${26 + _availableSizes.indexOf(size)}-${28 + _availableSizes.indexOf(size)}'),
+                                  ),
+                                ],
+                              );
+                            }).toList(),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

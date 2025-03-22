@@ -1,15 +1,14 @@
 import 'package:dashbaord/extensions.dart';
-import 'package:dashbaord/widgets/custom_appbar.dart';
+import 'package:dashbaord/widgets/custom_search_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/merch_item_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:dashbaord/screens/merch_details_screen.dart';
 import 'package:dashbaord/screens/merch_orders_screen.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:dashbaord/widgets/custom_appbar.dart';
 
 class MerchShopScreen extends StatefulWidget {
-  const MerchShopScreen({Key? key}) : super(key: key);
+  const MerchShopScreen({super.key});
 
   @override
   State<MerchShopScreen> createState() => _MerchShopScreenState();
@@ -18,13 +17,35 @@ class MerchShopScreen extends StatefulWidget {
 class _MerchShopScreenState extends State<MerchShopScreen> {
   final ApiServices _apiServices = ApiServices();
   List<MerchItem> _merchItems = [];
+  List<MerchItem> _filteredMerchItems = [];
   bool _isLoading = true;
   String? _errorMessage;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadMerchItems();
+    _searchController.addListener(_filterItems);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filterItems() {
+    final query = _searchController.text.toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredMerchItems = List.from(_merchItems);
+      } else {
+        _filteredMerchItems = _merchItems
+            .where((item) => item.title.toLowerCase().contains(query))
+            .toList();
+      }
+    });
   }
 
   Future<void> _loadMerchItems() async {
@@ -37,6 +58,7 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
       final items = await _apiServices.getMerchItems();
       setState(() {
         _merchItems = items;
+        _filteredMerchItems = List.from(items);
         _isLoading = false;
       });
     } catch (e) {
@@ -49,15 +71,14 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final textColor =
-        Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
-
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Merchandise',
         actions: [
           IconButton(
-            icon: Icon(Icons.history),
+            icon: Icon(Icons.history,
+                size: 28,
+                color: context.customColors.customAccentColor),
             onPressed: () {
               Navigator.push(
                 context,
@@ -70,13 +91,51 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
           ),
         ],
       ),
-      body: _buildBody(),
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: CustomSearchBar(
+              onSearch: (query) {
+                  setState(() => _searchController.text = query);
+              },
+            ),
+          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(16.0),
+          //   child: TextField(
+          //     controller: _searchController,
+          //     decoration: InputDecoration(
+          //       hintText: 'Search merchandise...',
+          //       prefixIcon: const Icon(Icons.search),
+          //       border: OutlineInputBorder(
+          //         borderRadius: BorderRadius.circular(12.0),
+          //       ),
+          //       contentPadding: const EdgeInsets.symmetric(vertical: 12.0),
+          //       suffixIcon: _searchController.text.isNotEmpty
+          //           ? IconButton(
+          //               icon: const Icon(Icons.clear),
+          //               onPressed: () {
+          //                 _searchController.clear();
+          //               },
+          //             )
+          //           : null,
+          //     ),
+          //   ),
+          // ),
+          Expanded(child: _buildBody()),
+        ],
+      ),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     }
 
     if (_errorMessage != null) {
@@ -84,11 +143,24 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            Text(
+              _errorMessage!,
+              style: const TextStyle(color: Colors.red, fontSize: 16),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
               onPressed: _loadMerchItems,
-              child: const Text('Retry'),
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),
@@ -96,7 +168,49 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
     }
 
     if (_merchItems.isEmpty) {
-      return const Center(child: Text('No merchandise items available'));
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.inventory_2_outlined,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No merchandise items available',
+              style: TextStyle(fontSize: 18),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadMerchItems,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Refresh'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_filteredMerchItems.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.search_off,
+              size: 64,
+              color: Colors.grey,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'No items match your search',
+              style: TextStyle(fontSize: 18),
+            ),
+          ],
+        ),
+      );
     }
 
     return RefreshIndicator(
@@ -105,13 +219,13 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
         padding: const EdgeInsets.all(16),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 2,
-          childAspectRatio: 0.75,
+          childAspectRatio: 0.7,
           crossAxisSpacing: 16,
           mainAxisSpacing: 16,
         ),
-        itemCount: _merchItems.length,
+        itemCount: _filteredMerchItems.length,
         itemBuilder: (context, index) {
-          final item = _merchItems[index];
+          final item = _filteredMerchItems[index];
           return _buildMerchItemCard(item);
         },
       ),
@@ -119,73 +233,90 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
   }
 
   Widget _buildMerchItemCard(MerchItem item) {
-    bool isAvailable = item.deadline.isAfter(DateTime.now());
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MerchItemDetailsScreen(itemId: item.id),
+    return Material(
+      borderRadius: BorderRadius.circular(16),
+      elevation: 4,
+      shadowColor: Colors.black26,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MerchItemDetailsScreen(itemId: item.id),
+            ),
+          ).then((_) => _loadMerchItems());
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
           ),
-        ).then((_) => _loadMerchItems());
-      },
-      child: Card(
-        elevation: 4,
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: Image.network(
-                item.imageUrl,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(child: Icon(Icons.error));
-                },
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Hero(
+                      tag: 'merch_image_${item.id}',
+                      child: Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return Center(
+                            child: CircularProgressIndicator(
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Icon(
+                              Icons.broken_image,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                          );
+                        },
+                      ),
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        '₹${item.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
-                      ),
-                      Text(
-                        isAvailable ? 'Available' : 'Closed',
-                        style: TextStyle(
-                          color: isAvailable ? Colors.green : Colors.red,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+              Container(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.title,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '₹${item.price.toStringAsFixed(0)}',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: context.customColors.customAccentColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
