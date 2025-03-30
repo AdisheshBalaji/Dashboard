@@ -2,9 +2,6 @@ package db
 
 import (
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
 
 	"github.com/LambdaIITH/Dashboard/backend/config"
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
@@ -13,18 +10,7 @@ import (
 
 func GetAnnouncementsFromDB(c *gin.Context, limit int, offset int) ([]schema.AnnouncementWithImages, error) {
 
-	imgFilesEntry, err := os.ReadDir("announcementImages/")
-	var imgFileNames [][]string
-
-	for _, val := range imgFilesEntry {
-		imgFileNames = append(imgFileNames, strings.Split(val.Name(), "."))
-	}
-	if err != nil {
-		fmt.Println("ERROR: Could not get image filenames")
-		return nil, err
-	}
-
-	query := `SELECT (id ,title, description, createdat, createdby, tags) FROM announcements ORDER BY createdat DESC LIMIT $1 OFFSET $2`
+	query := `SELECT (id ,title, description, createdat, createdby, tags, category, imageURI) FROM announcements ORDER BY createdat DESC LIMIT $1 OFFSET $2`
 	rows, err := config.DB.Query(c, query, limit, offset)
 	defer rows.Close()
 
@@ -36,24 +22,11 @@ func GetAnnouncementsFromDB(c *gin.Context, limit int, offset int) ([]schema.Ann
 
 	for rows.Next() {
 		var announcement schema.AnnouncementWithImages
-		if err := rows.Scan(&announcement.Announcement); err != nil {
+		if err := rows.Scan(&announcement); err != nil {
 			fmt.Printf("Error: Scanning Rows for Announcements\n")
 			return nil, err
 		}
-
-		hasImg := false
-		for _, val := range imgFileNames {
-			if val[0] == strconv.Itoa(announcement.ID) {
-				hasImg = true
-				announcement.ImageUrl = `/announcements/images/` + val[0] + "." + val[1]
-				break
-			}
-		}
-		if hasImg {
-			announcements = append(announcements, announcement)
-		} else {
-			fmt.Println("ERROR: Announcement does not have any corresponding image")
-		}
+		announcements = append(announcements, announcement)
 	}
 
 	if rows.Err() != nil {
@@ -64,9 +37,10 @@ func GetAnnouncementsFromDB(c *gin.Context, limit int, offset int) ([]schema.Ann
 	return announcements, nil
 }
 
-func PostAnnouncementToDB(c *gin.Context, announcement *schema.RequestAnnouncement) (int, error) {
-	query := `INSERT INTO announcements (title, description, createdat, createdby, tags) VALUES ($1, $2, $3, $4, $5)`
-	_, err := config.DB.Exec(c, query, announcement.Title, announcement.Description, announcement.CreatedAt, announcement.CreatedBy, announcement.Tags)
+func PostAnnouncementToDB(c *gin.Context, announcement *schema.AnnouncementRequest) (int, error) {
+	query := `INSERT INTO announcements (title, description, createdat, createdby, tags, category, imageURI) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	_, err := config.DB.Exec(c, query, announcement.Title, announcement.Description, announcement.CreatedAt, announcement.CreatedBy, announcement.Tags, announcement.Category, "")
+
 	if err != nil {
 		fmt.Printf("ERROR: Adding Announcement to DB\n")
 		return 0, err
@@ -80,6 +54,16 @@ func PostAnnouncementToDB(c *gin.Context, announcement *schema.RequestAnnounceme
 	}
 
 	return id, nil
+}
+
+func AddAnnouncementImageURIToDB(c *gin.Context, id int, imageURI string) error {
+	query := `UPDATE announcements SET imageURI=$1 WHERE id=$2`
+	_, err := config.DB.Exec(c, query, imageURI, id)
+	if err != nil {
+		fmt.Printf("ERROR: Could not add image URI to the announcement")
+		return err
+	}
+	return nil
 }
 
 func DeleteAnnouncementFromDB(c *gin.Context, id int) {

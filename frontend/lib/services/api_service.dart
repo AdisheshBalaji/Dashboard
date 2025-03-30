@@ -927,12 +927,24 @@ class ApiServices {
     return null;
   }
 
-  Future<List<String>?> getAnnouncementsFilters() async {
+  Future<List<String>?> getAnnouncementsTags() async {
     try {
-      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/filters");
+      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/tandc");
 
-      final response = await dio.get('${dio.options.baseUrl}/announcements/filters');
-      final data = json.decode(response.data).cast<String>();
+      final response = await dio.get('${dio.options.baseUrl}/announcements/tandc');
+      final data = json.decode(response.data)["tags"].cast<String>();
+      return data;
+    } catch (e) {
+      debugPrint("Failed to fetch announcements filters: $e");
+    }
+    return null;
+  }
+  Future<List<String>?> getAnnouncementsCategories() async {
+    try {
+      debugPrint("Making request to: ${dio.options.baseUrl}/announcements/tandc");
+
+      final response = await dio.get('${dio.options.baseUrl}/announcements/tandc');
+      final data = json.decode(response.data)["category"].cast<String>();
       return data;
     } catch (e) {
       debugPrint("Failed to fetch announcements filters: $e");
