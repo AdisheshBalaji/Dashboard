@@ -1,33 +1,51 @@
 #!/bin/bash
 
 serverURL="http://localhost:8000/announcements"
-if [[ $# -le 4 ]]; then
-    echo "Usage: ./makeAnAnnouncement.sh title description createdBy imgPath tag1 tag2 tag3 ....." 
-    echo "Example: ./makeAnAnnouncement.sh \"Bash Script\" \"Do i really need one?\" \"Rayan\" ~/Pictures/Screenshots/Screenshot_20241209_052705.png \"Lambda\" \"Kludge\""
+
+# Validate minimum required arguments before processing options
+if [[ $# -lt 4 ]]; then
+    echo "Usage: $0 title description createdBy imgPath [-t tag1 -t tag2] [-c category1 -c category2]"
+    echo "Example: $0 \"Bash Script\" \"Do I really need one?\" \"Rayan\" ~/Pictures/Screenshot.png -t Lambda -t Kludge -c Announcements"
     exit 1
 fi
 
+title="$1"
+description="$2"
+createdBy="$3"
+imgPath="$4"
 createdAt=$(date +%s)
 
-# Check if image file exists
-if [[ ! -f "$4" ]]; then
-    echo "Error: Image file '$4' not found!"
+# Validate image file existence
+if [[ ! -f "$imgPath" ]]; then
+    echo "Error: Image file '$imgPath' not found!"
     exit 1
 fi
 
-# Process tags into multiple -F "tags=value" arguments
+# Shift past positional arguments to process options
+shift 4  
+
 tag_args=()
-for tag in "${@:5}"; do
-    tag_args+=("-F" "tags=${tag}")
+category_args=()
+
+# Process optional -t (tags) and -c (categories) options
+while getopts "t:c:" opt; do
+    case "$opt" in
+        t) tag_args+=("-F" "tags=${OPTARG}") ;;
+        c) category_args+=("-F" "category=${OPTARG}") ;;
+        *) echo "Usage: $0 title description createdBy imgPath [-t tag1 -t tag2] [-c category1 -c category2]" >&2; exit 1 ;;
+    esac
 done
+
+# Debugging output
 echo "Executing curl command:"
-echo "curl -X POST \"${serverURL}\" -F 'title=${1}' -F 'description=${2}' -F 'createdAt=${createdAt}' -F 'createdBy=${3}' -F 'image=@${4}' ${tag_args[*]}"
+echo "curl -X POST \"${serverURL}\" -F 'title=${title}' -F 'description=${description}' -F 'createdAt=${createdAt}' -F 'createdBy=${createdBy}' -F 'image=@${imgPath}' ${tag_args[@]} ${category_args[@]}"
 
 # Send POST request
 curl -X POST "${serverURL}" \
-    -F "title=${1}" \
-    -F "description=${2}" \
+    -F "title=${title}" \
+    -F "description=${description}" \
     -F "createdAt=${createdAt}" \
-    -F "createdBy=${3}" \
-    -F "image=@${4}" \
-    "${tag_args[@]}"
+    -F "createdBy=${createdBy}" \
+    -F "image=@${imgPath}" \
+    "${tag_args[@]}" \
+    "${category_args[@]}"
