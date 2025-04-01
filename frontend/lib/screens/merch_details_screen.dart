@@ -958,10 +958,10 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      if (_item!.sizeGuideUrl.isNotEmpty) ...[
+                      if (_item!.sizeGuideUrl.isNotEmpty)
                         CachedNetworkImage(
                           imageUrl: _item!.sizeGuideUrl,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           width: double.infinity,
                           placeholder: (context, url) => Container(
                             height: 200,
@@ -980,77 +980,6 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                             ),
                           ),
                         ),
-                        const SizedBox(height: 24),
-                      ],
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withOpacity(0.2),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Table(
-                          border: TableBorder.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withOpacity(0.2),
-                            width: 1,
-                          ),
-                          children: [
-                            TableRow(
-                              decoration: BoxDecoration(
-                                color: context.customColors.customAccentColor
-                                    .withOpacity(0.1),
-                              ),
-                              children: const [
-                                Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('Size',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('Chest (in)',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('Length (in)',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ],
-                            ),
-                            ..._item!.availableSizes.map((size) {
-                              final index = _item!.availableSizes.indexOf(size);
-                              return TableRow(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(size.name),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(
-                                        '${36 + index * 2}-${38 + index * 2}'),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(
-                                        '${26 + index}-${28 + index}'),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
