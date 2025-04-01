@@ -222,7 +222,17 @@ CREATE TABLE IF NOT EXISTS merch
     price NUMERIC(10, 2) NOT NULL,
     image_url VARCHAR(256) NOT NULL,
     upi_id VARCHAR(100) NOT NULL,
+    is_oversized BOOLEAN DEFAULT FALSE,
+    size_guide_url VARCHAR(256),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS merch_sizes (
+    id SERIAL PRIMARY KEY,
+    merch_id BIGINT NOT NULL REFERENCES merch(id) ON DELETE CASCADE,
+    size_name VARCHAR(10) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(merch_id, size_name)
 );
 
 CREATE TABLE IF NOT EXISTS merch_images (
@@ -232,18 +242,16 @@ CREATE TABLE IF NOT EXISTS merch_images (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TYPE merch_size AS ENUM ('S', 'M', 'L', 'XL', 'XXL');
-
-CREATE TABLE IF NOT EXISTS orders
-(
+CREATE TABLE IF NOT EXISTS orders (
     id BIGSERIAL PRIMARY KEY,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     merch_id BIGINT NOT NULL REFERENCES merch(id) ON DELETE CASCADE ON UPDATE CASCADE,
     status BOOLEAN NOT NULL,
     order_date DATE NOT NULL,
-    size merch_size NOT NULL,
+    size VARCHAR(10),
     transaction_id TEXT NOT NULL,
     display_name VARCHAR(100) NOT NULL,
+    is_oversized BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

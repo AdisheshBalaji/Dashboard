@@ -233,6 +233,8 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
   }
 
   Widget _buildMerchItemCard(MerchItem item) {
+    final bool isAvailable = item.deadline.isAfter(DateTime.now());
+
     return Material(
       borderRadius: BorderRadius.circular(16),
       elevation: 4,
@@ -284,6 +286,28 @@ class _MerchShopScreenState extends State<MerchShopScreen> {
                             ),
                           );
                         },
+                      ),
+                    ),
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isAvailable
+                              ? Colors.green.withOpacity(0.8)
+                              : Colors.red.withOpacity(0.8),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          isAvailable ? 'Available' : 'Closed',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
                   ],

@@ -170,6 +170,7 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                         width: 90,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
+                          color: Theme.of(context).colorScheme.surfaceVariant,
                         ),
                         child: Icon(
                           Icons.image_not_supported_outlined,
@@ -195,16 +196,12 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'Size: ${order.size}',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
-                          fontSize: 15,
-                        ),
-                      ),
+                      
+                      _buildOrderOptions(order),
+                      
                       const SizedBox(height: 8),
                       Text(
-                        '₹${order.price.toStringAsFixed(2)}',
+                        '₹${order.price.toStringAsFixed(0)}',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -216,11 +213,13 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                 ),
               ],
             ),
+            
             Divider(
               height: 32, 
               thickness: 1,
               color: Theme.of(context).dividerColor,
             ),
+            
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -245,6 +244,7 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                     ),
                   ],
                 ),
+                
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -262,26 +262,27 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                         vertical: 6,
                       ),
                       decoration: BoxDecoration(
-                          color: order.status
-                              ? const Color(0xFF00A878).withAlpha(25)
-                              : const Color(0xFFFFA500).withAlpha(25),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          order.status ? 'Completed' : 'Pending',
+                        color: order.status
+                            ? const Color(0xFF00A878).withAlpha(25)
+                            : const Color(0xFFFFA500).withAlpha(25),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        order.status ? 'Completed' : 'Pending',
                           style: TextStyle(
                               color: order.status 
                               ? const Color(0xFF00A878) 
                               : const Color(0xFFFFA500), 
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
-                        ),
+                        )
                       ),
                     ),
                   ],
                 ),
               ],
             ),
+            
             const SizedBox(height: 16),
             ExpansionTile(
               title: Text(
@@ -310,11 +311,87 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
                 _buildDetailRow('Transaction ID:', order.transactionId),
                 const SizedBox(height: 12),
                 _buildDetailRow('Name:', order.displayName),
+                if (order.size != null) ...[
+                  const SizedBox(height: 12),
+                  _buildDetailRow('Size:', order.size!),
+                ],
+                if (order.isOversized) ...[
+                  const SizedBox(height: 12),
+                  _buildDetailRow('Fit:', 'Oversized'),
+                ],
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildOrderOptions(MerchOrder order) {
+    final List<Widget> options = [];
+    
+    if (order.size != null) {
+      options.add(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          margin: const EdgeInsets.only(right: 8, bottom: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            'Size: ${order.size}',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    if (order.isOversized) {
+      options.add(
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          margin: const EdgeInsets.only(bottom: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+              width: 1,
+            ),
+          ),
+          child: Text(
+            'Oversized',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
+      );
+    }
+    
+    if (options.isEmpty) {
+      return Text(
+        'Standard fit',
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+          fontSize: 15,
+        ),
+      );
+    }
+    
+    return Wrap(
+      children: options,
     );
   }
 

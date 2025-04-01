@@ -5,15 +5,18 @@ import 'package:flutter/material.dart';
 import 'package:dashbaord/models/merch_item_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:flutter/services.dart';
+import 'package:dashbaord/screens/merch_payment_confirmation.dart';
 
 class MerchPaymentScreen extends StatefulWidget {
   final MerchItem item;
-  final String selectedSize;
+  final String? selectedSize;
+  final bool isOversized;
 
   const MerchPaymentScreen({
     super.key,
     required this.item,
-    required this.selectedSize,
+    this.selectedSize,
+    required this.isOversized,
   });
 
   @override
@@ -72,8 +75,8 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
         widget.item.id,
         widget.selectedSize,
         _nameController.text.trim(),
-        _upiIdController.text.trim(),
         _transactionIdController.text.trim(),
+        widget.isOversized,
       );
 
       setState(() {
@@ -116,8 +119,7 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color:
-                          Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -132,25 +134,20 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.confirmation_number_outlined,
-                                size: 18),
+                            const Icon(Icons.confirmation_number_outlined, size: 18),
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
                                 'Order ID: ${result['order_id']}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500),
+                                style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.copy, size: 16),
                               onPressed: () {
-                                Clipboard.setData(
-                                    ClipboardData(text: result['order_id']));
+                                Clipboard.setData(ClipboardData(text: result['order_id'].toString()));
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text('Order ID copied to clipboard')),
+                                  const SnackBar(content: Text('Order ID copied to clipboard')),
                                 );
                               },
                               padding: EdgeInsets.zero,
@@ -167,19 +164,15 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                             Expanded(
                               child: Text(
                                 'Transaction ID: ${result['transaction_id']}',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w500),
+                                style: const TextStyle(fontWeight: FontWeight.w500),
                               ),
                             ),
                             IconButton(
                               icon: const Icon(Icons.copy, size: 16),
                               onPressed: () {
-                                Clipboard.setData(ClipboardData(
-                                    text: result['transaction_id']));
+                                Clipboard.setData(ClipboardData(text: result['transaction_id']));
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content: Text(
-                                          'Transaction ID copied to clipboard')),
+                                  const SnackBar(content: Text('Transaction ID copied to clipboard')),
                                 );
                               },
                               padding: EdgeInsets.zero,
@@ -188,6 +181,36 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                             ),
                           ],
                         ),
+                        if (widget.selectedSize != null) ...[
+                          const Divider(),
+                          Row(
+                            children: [
+                              const Icon(Icons.straighten, size: 18),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Size: ${widget.selectedSize}',
+                                  style: const TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        if (widget.isOversized) ...[
+                          const Divider(),
+                          Row(
+                            children: [
+                              const Icon(Icons.format_size, size: 18),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'Fit: Oversized',
+                                  style: TextStyle(fontWeight: FontWeight.w500),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -196,8 +219,18 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
               actions: [
                 FilledButton.tonal(
                   onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                        builder: (context) => MerchPaymentConfirmationScreen(
+                          orderId: result['order_id'],
+                          transactionId: result['transaction_id'],
+                          orderDate: DateTime.now(),
+                          totalAmount: widget.item.price,
+                          selectedSize: widget.selectedSize,
+                          isOversized: widget.isOversized,
+                        ),
+                      ),
+                    );
                   },
                   style: FilledButton.styleFrom(
                     shape: RoundedRectangleBorder(
@@ -205,7 +238,7 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                     ),
                     minimumSize: const Size(double.infinity, 48),
                   ),
-                  child: const Text('BACK TO SHOP'),
+                  child: const Text('VIEW RECEIPT'),
                 ),
               ],
               actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
@@ -291,29 +324,21 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                                       width: 100,
                                       height: 100,
                                       fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
+                                      errorBuilder: (context, error, stackTrace) {
                                         return Container(
                                           width: 100,
                                           height: 100,
-                                          color: theme.colorScheme
-                                              .surfaceContainerHighest,
-                                          child: const Icon(Icons
-                                              .image_not_supported_outlined),
+                                          color: theme.colorScheme.surfaceContainerHighest,
+                                          child: const Icon(Icons.image_not_supported_outlined),
                                         );
                                       },
-                                      loadingBuilder:
-                                          (context, child, loadingProgress) {
-                                        if (loadingProgress == null)
-                                          return child;
+                                      loadingBuilder: (context, child, loadingProgress) {
+                                        if (loadingProgress == null) return child;
                                         return Container(
                                           width: 100,
                                           height: 100,
-                                          color: theme.colorScheme
-                                              .surfaceContainerHighest,
-                                          child: const Center(
-                                              child:
-                                                  CircularProgressIndicator()),
+                                          color: theme.colorScheme.surfaceContainerHighest,
+                                          child: const Center(child: CircularProgressIndicator()),
                                         );
                                       },
                                     ),
@@ -322,8 +347,7 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                                 const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         widget.item.title,
@@ -334,33 +358,53 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10, vertical: 6),
-                                        decoration: BoxDecoration(
-                                          color: theme
-                                              .colorScheme.primaryContainer,
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          'Size: ${widget.selectedSize}',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.w500,
-                                            color: theme
-                                                .colorScheme.onPrimaryContainer,
+                                      
+                                      // Show size chip if a size was selected
+                                      if (widget.selectedSize != null) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.primaryContainer,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            'Size: ${widget.selectedSize}',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: theme.colorScheme.onPrimaryContainer,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(height: 12),
+                                        const SizedBox(height: 8),
+                                      ],
+                                      
+                                      // Show oversized chip if selected
+                                      if (widget.isOversized) ...[
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                          decoration: BoxDecoration(
+                                            color: theme.colorScheme.tertiaryContainer,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            'Oversized Fit',
+                                            style: TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w500,
+                                              color: theme.colorScheme.onTertiaryContainer,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 8),
+                                      ],
+                                      
                                       Text(
-                                        '₹${widget.item.price.toStringAsFixed(2)}',
+                                        '₹${widget.item.price.toStringAsFixed(0)}',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20,
-                                          color: context
-                                              .customColors.customAccentColor,
+                                          color: context.customColors.customAccentColor,
                                         ),
                                       ),
                                     ],
