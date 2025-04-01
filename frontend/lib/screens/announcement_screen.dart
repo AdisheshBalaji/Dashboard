@@ -71,9 +71,9 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
     });
 
     final response = await ApiServices().getAnnouncements(limit, offset);
-    final tags= await ApiServices().getAnnouncementsTags();
+    final tags = await ApiServices().getAnnouncementsTags();
 
-    if (tags== null) {
+    if (tags == null) {
       debugPrint('Error: Could not fetch filters');
     } else {
       _highlightedFilterOptions = tags;

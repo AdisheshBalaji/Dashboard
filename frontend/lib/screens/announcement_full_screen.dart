@@ -3,6 +3,7 @@ import 'package:dashbaord/utils/format_date.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/services/api_service.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AnnouncementFullScreen extends StatefulWidget {
@@ -120,13 +121,14 @@ class _AnnouncementFullScreenState extends State<AnnouncementFullScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    "${apiServices.backendUrl}${widget.image}",
-                    fit: BoxFit.cover,
+                if (widget.image != null)
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      "${apiServices.backendUrl}${widget.image}",
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                ),
                 const SizedBox(height: 16),
                 Text(
                   widget.title,
@@ -137,12 +139,29 @@ class _AnnouncementFullScreenState extends State<AnnouncementFullScreen> {
                   ),
                 ),
                 const SizedBox(height: 18),
-                Text(
-                  widget.description,
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.white70,
-                    height: 1.4,
+                MarkdownBody(
+                  data: widget.description,
+                  styleSheet: MarkdownStyleSheet(
+                    p: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      height: 1.4,
+                    ),
+                    h1: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    h2: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                    h3: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
