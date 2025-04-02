@@ -25,10 +25,9 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
   MerchItem? _item;
   bool _isLoading = true;
   String? _errorMessage;
-  String _selectedSize = 'M';
-  final List<String> _availableSizes = ['S', 'M', 'L', 'XL', 'XXL'];
+  String? _selectedSize;
+  bool _isOversized = false;
   int _currentImageIndex = 0;
-  final CarouselController _carouselController = CarouselController();
   late AnimationController _animationController;
   bool _isDescriptionExpanded = false;
 
@@ -59,6 +58,13 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
       setState(() {
         _item = item;
         _isLoading = false;
+        
+        // Set default size if available
+        if (_item != null && _item!.hasSizes && _item!.availableSizes.isNotEmpty) {
+          _selectedSize = _item!.availableSizes.first.name;
+        } else {
+          _selectedSize = null;
+        }
       });
     } catch (e) {
       setState(() {
@@ -269,7 +275,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
         child: Row(
           children: [
             Expanded(
-                flex: 2,
+              flex: 2,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -287,7 +293,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '₹${_item!.price.toStringAsFixed(2)}',
+                    '₹${_item!.price.toStringAsFixed(0)}',
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -309,6 +315,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                             builder: (context) => MerchPaymentScreen(
                               item: _item!,
                               selectedSize: _selectedSize,
+                              isOversized: _isOversized,
                             ),
                           ),
                         );
@@ -490,7 +497,6 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(32)),
             ),
-            // margin: const EdgeInsets.only(top: -20),
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -499,9 +505,8 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                 const SizedBox(height: 32),
                 _buildDescriptionSection(),
                 const SizedBox(height: 32),
-                _buildSizeSelectionSection(),
-                // const SizedBox(height: 32),
-                // _buildSpecificationsSection(),
+                if (_item!.hasSizes) _buildSizeSelectionSection(),
+                _buildOversizedOption(),
                 const SizedBox(height: 16),
               ],
             ),
@@ -693,6 +698,12 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
   }
 
   Widget _buildSizeSelectionSection() {
+    if (_item == null || !_item!.hasSizes) {
+      return const SizedBox.shrink();
+    }
+    
+    final List<MerchSize> availableSizes = _item!.availableSizes;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -704,8 +715,7 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color:
-                        context.customColors.customAccentColor.withOpacity(0.1),
+                    color: context.customColors.customAccentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
@@ -726,38 +736,40 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                 ),
               ],
             ),
-            TextButton.icon(
-              onPressed: () {
-                _showSizeGuideDialog();
-              },
-              icon: Icon(
-                Icons.help_outline_rounded,
-                color: context.customColors.customAccentColor,
-                size: 18,
-              ),
-              label: const Text('Size Guide'),
-              style: TextButton.styleFrom(
-                foregroundColor: context.customColors.customAccentColor,
-                textStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 14,
+            if (_item!.sizeGuideUrl.isNotEmpty)
+              TextButton.icon(
+                onPressed: () {
+                  _showSizeGuideDialog();
+                },
+                icon: Icon(
+                  Icons.help_outline_rounded,
+                  color: context.customColors.customAccentColor,
+                  size: 18,
+                ),
+                label: const Text('Size Guide'),
+                style: TextButton.styleFrom(
+                  foregroundColor: context.customColors.customAccentColor,
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
                 ),
               ),
-            ),
           ],
         ),
+        const SizedBox(height: 16),
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 5,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: availableSizes.length > 4 ? 5 : availableSizes.length,
             childAspectRatio: 1,
             crossAxisSpacing: 12,
             mainAxisSpacing: 12,
           ),
-          itemCount: _availableSizes.length,
+          itemCount: availableSizes.length,
           itemBuilder: (context, index) {
-            final size = _availableSizes[index];
+            final size = availableSizes[index].name;
             final bool isSelected = _selectedSize == size;
 
             return GestureDetector(
@@ -806,6 +818,85 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
               ),
             );
           },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOversizedOption() {
+    if (_item == null || !_item!.isOversized) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 32),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: context.customColors.customAccentColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                Icons.format_size_rounded,
+                size: 22,
+                color: context.customColors.customAccentColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              'Fit Option',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Theme.of(context).colorScheme.onSurface,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Oversized Fit',
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Switch(
+                value: _isOversized,
+                onChanged: (value) {
+                  setState(() {
+                    _isOversized = value;
+                  });
+                },
+                activeColor: context.customColors.customAccentColor,
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -867,81 +958,28 @@ class _MerchItemDetailsScreenState extends State<MerchItemDetailsScreen>
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // TODO: change this
-                      // Image.network(
-                      //   'https://via.placeholder.com/400x300?text=Size+Chart',
-                      //   fit: BoxFit.cover,
-                      //   width: double.infinity,
-                      // ),
-                      // const SizedBox(height: 24),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withOpacity(0.2),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Table(
-                          border: TableBorder.all(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .outline
-                                .withOpacity(0.2),
-                            width: 1,
-                          ),
-                          children: [
-                            TableRow(
-                              decoration: BoxDecoration(
-                                color: context.customColors.customAccentColor
-                                    .withOpacity(0.1),
+                      if (_item!.sizeGuideUrl.isNotEmpty)
+                        CachedNetworkImage(
+                          imageUrl: _item!.sizeGuideUrl,
+                          fit: BoxFit.contain,
+                          width: double.infinity,
+                          placeholder: (context, url) => Container(
+                            height: 200,
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: context.customColors.customAccentColor,
                               ),
-                              children: const [
-                                Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('Size',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('Chest (in)',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                                Padding(
-                                  padding: EdgeInsets.all(12),
-                                  child: Text('Length (in)',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                ),
-                              ],
                             ),
-                            ...['S', 'M', 'L', 'XL', 'XXL'].map((size) {
-                              return TableRow(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(size),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(
-                                        '${36 + _availableSizes.indexOf(size) * 2}-${38 + _availableSizes.indexOf(size) * 2}'),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Text(
-                                        '${26 + _availableSizes.indexOf(size)}-${28 + _availableSizes.indexOf(size)}'),
-                                  ),
-                                ],
-                              );
-                            }).toList(),
-                          ],
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 200,
+                            color: Theme.of(context).colorScheme.surfaceVariant,
+                            child: const Center(
+                              child: Icon(Icons.error_outline, size: 50, color: Colors.grey),
+                            ),
+                          ),
                         ),
-                      ),
                     ],
                   ),
                 ),

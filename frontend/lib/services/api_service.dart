@@ -1040,14 +1040,18 @@ class ApiServices {
   }
 
   Future<Map<String, dynamic>?> createMerchOrder(
-      int merchId, String size, String displayName, String vpa, String transactionId) async {
+    int merchId, 
+    String? size, 
+    String displayName, 
+    String transactionId,
+    bool isOversized) async {
     try {
       final response = await dio.post('/merch/order', data: {
         'merch_id': merchId,
         'size': size,
         'display_name': displayName,
-        'vpa': vpa,
         'transaction_id': transactionId,
+        'is_oversized': isOversized,
       });
       return response.data;
     } catch (e) {

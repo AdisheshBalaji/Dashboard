@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import List
+from typing import List, Optional
 from Routes.Auth.cookie import get_user_id
 from pydantic import BaseModel
 from utils import conn
@@ -13,10 +13,10 @@ router = APIRouter(
 
 class OrderCreate(BaseModel):
     merch_id: int
-    size: str
+    size: Optional[str] = None
     display_name: str
-    vpa: str
     transaction_id: str
+    is_oversized: bool
 
 class OrderUpdate(BaseModel):
     status: bool
@@ -44,10 +44,27 @@ def get_items():
                 "url": image_url
             })
         
+        sizes_query = get_merch_sizes()
+        cursor.execute(sizes_query)
+        all_sizes = cursor.fetchall()
+        sizes_by_merch_id = {}
+        for size in all_sizes:
+            merch_id, size_id, size_name, _ = size
+            if merch_id not in sizes_by_merch_id:
+                sizes_by_merch_id[merch_id] = []
+            sizes_by_merch_id[merch_id].append({
+                "id": size_id,
+                "name": size_name
+            })
+        
         result = []
         for item in items:
             merch_id = item[0]
             images = images_by_merch_id.get(merch_id, [])
+            sizes = sizes_by_merch_id.get(merch_id, [])
+            
+            has_sizes = len(sizes) > 0
+            
             result.append({
                 "id": merch_id,
                 "title": item[1],
@@ -58,6 +75,10 @@ def get_items():
                 "description": item[5],
                 "upi_id": item[6],
                 "created_at": item[7].isoformat(),
+                "is_oversized": item[8],
+                "size_guide_url": item[9],
+                "available_sizes": sizes,
+                "has_sizes": has_sizes
             })
         return result
     except Exception as e:
@@ -79,9 +100,21 @@ def get_item(item_id: int):
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Merchandise item with ID {item_id} not found"
             )
+            
         images_query = get_merch_images(item_id)
         cursor.execute(images_query)
         images = [{"url": img[1]} for img in cursor.fetchall()]
+        
+        sizes_query = get_merch_sizes(item_id)
+        cursor.execute(sizes_query)
+        sizes_data = cursor.fetchall()
+        sizes = []
+        for size in sizes_data:
+            merch_id, size_id, size_name, _ = size
+            sizes.append({
+                "id": size_id,
+                "name": size_name
+            })
         
         return {
             "id": item[0],
@@ -93,6 +126,9 @@ def get_item(item_id: int):
             "description": item[5],
             "upi_id": item[6],
             "created_at": item[7].isoformat(),
+            "is_oversized": item[8],
+            "size_guide_url": item[9],
+            "available_sizes": sizes
         }
     except HTTPException:
         raise
@@ -105,13 +141,6 @@ def get_item(item_id: int):
 @router.post("/order")
 def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
     try:
-        valid_sizes = ['S', 'M', 'L', 'XL', 'XXL']
-        if order.size not in valid_sizes:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid size. Must be one of: {', '.join(valid_sizes)}"
-            )
-            
         user = get_user(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -134,9 +163,41 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
         if not item_data:
             raise HTTPException(status_code=404, detail="Merchandise item not found")
         
+        oversized_option = bool(item_data[8])
+        
+        if order.is_oversized and not oversized_option:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This merchandise does not have an oversized option"
+            )
+            
+        sizes_query = get_merch_sizes(order.merch_id)
+        cursor.execute(sizes_query)
+        available_sizes = [size[2] for size in cursor.fetchall()]
+        has_sizes = len(available_sizes) > 0
+        
+        if has_sizes:
+            if order.size is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Size is required for this merchandise"
+                )
+            if order.size not in available_sizes:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid size. Must be one of: {', '.join(available_sizes)}"
+                )
+        elif order.size is not None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This merchandise does not have size options"
+            )
+        
+        chosen_is_oversized = order.is_oversized
+        
         order_query = insert_order_query(
             user_id, order.merch_id, order.size,
-            order.transaction_id, order.display_name
+            order.transaction_id, order.display_name, chosen_is_oversized
         )
         cursor.execute(order_query)
         order_id = cursor.fetchone()[0]
@@ -182,7 +243,8 @@ def list_user_orders(user_id: int = Depends(get_user_id)):
                 "status": order[6],
                 "order_date": order[7].isoformat(),
                 "transaction_id": order[8],
-                "display_name": order[9]
+                "display_name": order[9],
+                "is_oversized": order[10]
             })
         return result
     except Exception as e:
