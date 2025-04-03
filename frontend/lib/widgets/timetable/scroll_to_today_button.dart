@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 
 class TodayButton extends StatelessWidget {
@@ -13,7 +14,7 @@ class TodayButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.red,
+          backgroundColor: context.customColors.customAccentColor,
           elevation: 10,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),

@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -106,7 +107,8 @@ class _AddEventBottomSheetState extends State<AddEventBottomSheet> {
                         borderSide: BorderSide(color: Colors.grey.shade700),
                       ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.redAccent),
+                        borderSide: BorderSide(
+                            color: context.customColors.customAccentColor),
                       ),
                     ),
                     style: const TextStyle(color: Colors.white),
@@ -129,7 +131,8 @@ class _AddEventBottomSheetState extends State<AddEventBottomSheet> {
                         borderSide: BorderSide(color: Colors.grey.shade700),
                       ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.redAccent),
+                        borderSide: BorderSide(
+                            color: context.customColors.customAccentColor),
                       ),
                     ),
                     style: const TextStyle(color: Colors.white),
@@ -149,7 +152,8 @@ class _AddEventBottomSheetState extends State<AddEventBottomSheet> {
                             borderSide: BorderSide(color: Colors.grey.shade700),
                           ),
                           focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.redAccent),
+                            borderSide: BorderSide(
+                                color: context.customColors.customAccentColor),
                           ),
                         ),
                         style: const TextStyle(color: Colors.white),
@@ -180,7 +184,8 @@ class _AddEventBottomSheetState extends State<AddEventBottomSheet> {
                             borderSide: BorderSide(color: Colors.grey.shade700),
                           ),
                           focusedBorder: UnderlineInputBorder(
-                            borderSide: BorderSide(color: Colors.redAccent),
+                            borderSide: BorderSide(
+                                color: context.customColors.customAccentColor),
                           ),
                         ),
                         style: const TextStyle(color: Colors.white),
@@ -205,7 +210,7 @@ class _AddEventBottomSheetState extends State<AddEventBottomSheet> {
                   ElevatedButton(
                     onPressed: _submitEvent,
                     style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
+                        backgroundColor: context.customColors.customAccentColor,
                         foregroundColor: Colors.white // Button color
                         ),
                     child: const Text("Add Event"),

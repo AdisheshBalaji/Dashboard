@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_search_model.dart';
 import 'package:dashbaord/services/api_service.dart';
 import 'package:flutter/material.dart';
@@ -148,7 +149,8 @@ class _CourseSearchBottomSheetState extends State<CourseSearchBottomSheet> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           shape: const CircleBorder(),
-                          backgroundColor: Colors.red,
+                          backgroundColor:
+                              context.customColors.customAccentColor,
                           padding: const EdgeInsets.all(16),
                         ),
                         onPressed: () {
@@ -246,8 +248,7 @@ class _CourseSearchBottomSheetState extends State<CourseSearchBottomSheet> {
                     _buildCourseInfoRow(
                         Icons.meeting_room, 'Classroom: $classroom', textColor),
                   if (instructor != null && instructor != '')
-                    _buildCourseInfoRow(
-                        Icons.person, instructor, textColor),
+                    _buildCourseInfoRow(Icons.person, instructor, textColor),
                 ],
               ),
             ),

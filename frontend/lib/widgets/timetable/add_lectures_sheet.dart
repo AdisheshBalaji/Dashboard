@@ -1,4 +1,5 @@
 import 'package:dashbaord/constants/enums/iith_slots.dart';
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/utils/normal_text.dart';
@@ -278,7 +279,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
               isNotFilled
                   ? Text("Please fill in both fields",
                       style: TextStyle(
-                        color: Colors.red,
+                        color: context.customColors.customAccentColor,
                       ))
                   : SizedBox(),
               const SizedBox(height: 16),
@@ -313,7 +314,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                     icon: const Icon(Icons.add, size: 18, color: Colors.white),
                     label: const Text("Add Slot"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: context.customColors.customAccentColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 1),
@@ -328,7 +329,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
               noSlotsSelected
                   ? Text("Please select at least one slot",
                       style: TextStyle(
-                        color: Colors.red,
+                        color: context.customColors.customAccentColor,
                       ))
                   : ListView.builder(
                       shrinkWrap: true,
@@ -345,7 +346,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                             });
                           },
                           background: Container(
-                            color: Colors.redAccent,
+                            color: context.customColors.customAccentColor,
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(right: 16.0),
                             child: const Icon(
@@ -375,7 +376,8 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                                             ?.color),
                                     IconButton(
                                       icon: Icon(Icons.delete,
-                                          color: Colors.redAccent),
+                                          color: context
+                                              .customColors.customAccentColor),
                                       onPressed: () {
                                         // Add a confirm dialog if you want to ask before deleting
                                         setState(() {
@@ -438,7 +440,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: context.customColors.customAccentColor,
                       foregroundColor: Colors.white // Button color
                       ),
                   child: const Text(

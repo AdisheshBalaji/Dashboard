@@ -1,4 +1,5 @@
 import 'package:calendar_view/calendar_view.dart';
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:flutter/material.dart';
@@ -67,7 +68,8 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
           events.add(CalendarEventData(
             date: date, // Optional, based on your requirements
             title: lecture.courseCode,
-            description: widget.timetable!.courses[lecture.courseCode]!["title"],
+            description:
+                widget.timetable!.courses[lecture.courseCode]!["title"],
             startTime: startTime,
             endTime: endTime,
           ));
@@ -221,7 +223,7 @@ class WeekPageHeader extends StatelessWidget {
                   fontSize: 16,
                   fontWeight: isCurrentWeek ? FontWeight.w500 : FontWeight.w400,
                   color: isCurrentWeek
-                      ? Colors.redAccent
+                      ? context.customColors.customAccentColor
                       : Theme.of(context).textTheme.bodyMedium?.color,
                 ),
               ),

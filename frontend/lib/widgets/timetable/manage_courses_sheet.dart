@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/widgets/timetable/manage_lectures_sheet.dart';
@@ -208,7 +209,8 @@ class _ManageCoursesBottomSheetState extends State<ManageCoursesBottomSheet> {
                                   ),
                                   IconButton(
                                     icon: Icon(Icons.delete,
-                                        color: Colors.redAccent),
+                                        color: context
+                                            .customColors.customAccentColor),
                                     onPressed: () {
                                       _removeCourse(courseCode);
                                     },
@@ -257,10 +259,13 @@ class _ManageCoursesBottomSheetState extends State<ManageCoursesBottomSheet> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: context.customColors.customAccentColor,
                     foregroundColor: Colors.white, // Button color
                   ),
-                  icon: Icon(Icons.check, color: Colors.white,), // Leading icon
+                  icon: Icon(
+                    Icons.check,
+                    color: Colors.white,
+                  ), // Leading icon
                   label: Text(
                     widget.isAddCourses ? "Add" : "Save",
                     style: TextStyle(fontSize: 18),

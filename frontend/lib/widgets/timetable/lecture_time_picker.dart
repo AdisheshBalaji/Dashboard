@@ -1,4 +1,5 @@
 import 'package:dashbaord/constants/enums/iith_slots.dart';
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/utils/normal_text.dart';
@@ -93,7 +94,7 @@ class _LectureTimePickerBottomSheetState
                 SizedBox(width: 10), // Add space between buttons
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: context.customColors.customAccentColor,
                     foregroundColor: Colors.white,
                   ),
                   child: Text('Add Anyway'),
@@ -151,12 +152,12 @@ class _LectureTimePickerBottomSheetState
         children: [
           Container(
             padding: EdgeInsets.fromLTRB(0, 16, 0, 5),
-            child: const Text(
+            child: Text(
               "Add Slot",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.red,
+                color: context.customColors.customAccentColor,
               ),
             ),
           ),
@@ -220,7 +221,7 @@ class _LectureTimePickerBottomSheetState
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: selectedDay == day
-                                ? Colors.red
+                                ? context.customColors.customAccentColor
                                 : Theme.of(context).cardColor,
                             padding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
@@ -228,7 +229,7 @@ class _LectureTimePickerBottomSheetState
                               borderRadius: BorderRadius.circular(12),
                               side: BorderSide(
                                 color: selectedDay == day
-                                    ? Colors.red
+                                    ? context.customColors.customAccentColor
                                     : Colors.transparent,
                                 width: 2,
                               ),
@@ -332,7 +333,7 @@ class _LectureTimePickerBottomSheetState
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 shape: const CircleBorder(),
-                backgroundColor: Colors.red,
+                backgroundColor: context.customColors.customAccentColor,
                 padding: const EdgeInsets.all(16),
               ),
               onPressed: () {
