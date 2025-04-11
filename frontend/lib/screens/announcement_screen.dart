@@ -83,7 +83,6 @@ class _AnnouncementScreenState extends State<AnnouncementScreen> {
       setState(() {
         loadedAll = true;
       });
-      showError(msg: "You are at the end of list");
     } else {
       setState(() {
         announcements.addAll(response);
