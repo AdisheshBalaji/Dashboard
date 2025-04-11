@@ -9,18 +9,20 @@ type Announcement struct {
 	CreatedAt   int      `json:"createdAt"`
 	CreatedBy   string   `json:"createdBy"`
 	Tags        []string `json:"tags"`
+	Category    []string `json:"category"`
 }
 
 type AnnouncementWithImages struct {
 	Announcement
-	ImageUrl string `json:"imageUrl"`
+	ImageURI string `json:"imageURI"`
 }
 
-type RequestAnnouncement struct {
+type AnnouncementRequest struct {
 	Title       string                `form:"title"`
 	Description string                `form:"description"`
 	CreatedAt   int64                 `form:"createdAt"`
 	CreatedBy   string                `form:"createdBy"`
 	Tags        []string              `form:"tags"`
+	Category    []string              `form:"category"`
 	Image       *multipart.FileHeader `form:"image"`
 }

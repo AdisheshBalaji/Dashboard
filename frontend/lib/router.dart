@@ -2,6 +2,7 @@ import 'package:dashbaord/constants/enums/lost_and_found.dart';
 import 'package:dashbaord/error.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/user_model.dart';
+import 'package:dashbaord/screens/announcement_full_screen.dart';
 import 'package:dashbaord/screens/announcement_screen.dart';
 import 'package:dashbaord/screens/city_bus_screen.dart';
 import 'package:dashbaord/screens/bus_timings_screen.dart';
@@ -27,6 +28,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 class AppRouter {
   static AppRouter? _instance;
 
@@ -48,6 +51,7 @@ class AppRouter {
   late final GoRouter router = GoRouter(
     initialLocation: '/',
     observers: [_analyticsService.getAnalyticsObserver()],
+    navigatorKey: rootNavigatorKey,
     routes: [
       GoRoute(
         path: '/',
@@ -85,8 +89,7 @@ class AppRouter {
         path: '/login',
         builder: (context, state) {
           final data = state.extra as Map<String, dynamic>? ?? {};
-          final timeDilationFactor =
-              data['timeDilationFactor'] as double? ?? 1.0;
+          final timeDilationFactor = data['timeDilationFactor'] as double? ?? 1.0;
           final timetableCode = data['timetableCode'];
 
           return LoginScreenWrapper(
@@ -110,8 +113,7 @@ class AppRouter {
               image: image,
               onThemeChanged: onThemeChanged,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -129,8 +131,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: CityBusScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -148,8 +149,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: FaceUploadScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -171,8 +171,7 @@ class AppRouter {
             child: RoomBookingForm(
               user: user,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -201,10 +200,8 @@ class AppRouter {
             isMe = false;
           }
 
-          final startTime =
-              startTimeString != null ? DateTime.parse(startTimeString) : null;
-          final endTime =
-              endTimeString != null ? DateTime.parse(endTimeString) : null;
+          final startTime = startTimeString != null ? DateTime.parse(startTimeString) : null;
+          final endTime = endTimeString != null ? DateTime.parse(endTimeString) : null;
 
           final data = state.extra as Map<String, dynamic>? ?? {};
           final user = data['user'] as UserModel?;
@@ -220,8 +217,7 @@ class AppRouter {
               from: from,
               to: to,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -253,8 +249,7 @@ class AppRouter {
               seats: seats,
               comments: comments,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(0, 1),
@@ -283,8 +278,7 @@ class AppRouter {
             child: LostAndFoundScreen(
               currentUserEmail: currentUserEmail,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -302,8 +296,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: LostAndFoundAddItemScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(0, 1),
@@ -324,8 +317,7 @@ class AppRouter {
           if (id == null) {
             return CustomTransitionPage(
               child: const ErrorScreen(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 return SlideTransition(
                   position: Tween<Offset>(
                     begin: const Offset(0, 0),
@@ -345,8 +337,7 @@ class AppRouter {
           } else {
             return CustomTransitionPage(
               child: const ErrorScreen(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
                 return SlideTransition(
                   position: Tween<Offset>(
                     begin: const Offset(0, 0),
@@ -368,8 +359,7 @@ class AppRouter {
               id: id,
               lostOrFound: lrf,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -394,8 +384,7 @@ class AppRouter {
               messMenu: messMenu,
               week: week,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -427,8 +416,7 @@ class AppRouter {
               busSchedule: busSchedule,
               full: full,
             ),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -471,8 +459,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const CommunityScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -490,8 +477,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const AnnouncementScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -504,13 +490,39 @@ class AppRouter {
         },
       ),
       GoRoute(
+          path: '/announcements/:id',
+          pageBuilder: (context, state) {
+            final extras = state.extra as Map<String, dynamic>;
+
+            return CustomTransitionPage(
+              key: state.pageKey,
+              child: AnnouncementFullScreen(
+                image: extras['image'] as String?,
+                source: extras['source'] as String,
+                date: extras['date'] as String,
+                title: extras['title'] as String,
+                description: extras['description'] as String,
+                tags: extras['tags'] as List<String>,
+                id: extras['id'] as num,
+              ),
+              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
+            );
+          }),
+      GoRoute(
         path: '/merch',
         pageBuilder: (context, state) {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const MerchShopScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),
@@ -528,8 +540,7 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const MerchOrdersScreen(),
-            transitionsBuilder:
-                (context, animation, secondaryAnimation, child) {
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
                   begin: const Offset(1, 0),

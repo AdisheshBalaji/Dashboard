@@ -219,3 +219,15 @@ CREATE TABLE IF NOT EXISTS face
     face_url VARCHAR(256) NOT NULL,
     user_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS announcements
+(
+    id BIGSERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    createdat bigint NOT NULL,
+    createdby TEXT NOT NULL,
+    tags TEXT[],
+    category TEXT[],
+    imageURI TEXT
+);

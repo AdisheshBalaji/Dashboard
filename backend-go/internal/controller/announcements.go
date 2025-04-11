@@ -3,11 +3,11 @@ package controller
 import (
 	"encoding/json"
 	"fmt"
-	"image"
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 	"slices"
@@ -15,6 +15,7 @@ import (
 	"strings"
 
 	"github.com/LambdaIITH/Dashboard/backend/internal/db"
+	"github.com/LambdaIITH/Dashboard/backend/internal/helpers"
 	"github.com/LambdaIITH/Dashboard/backend/internal/schema"
 	"github.com/gin-gonic/gin"
 )
@@ -40,42 +41,37 @@ func GetAnnouncements(c *gin.Context) {
 }
 
 func PostAnnouncement(c *gin.Context) {
-	var announcement schema.RequestAnnouncement
+	var announcement schema.AnnouncementRequest
 	if c.Bind(&announcement) != nil {
 		fmt.Println("ERROR: Post Announcement Data could not bind")
+		c.Status(http.StatusBadRequest)
 		return
 	}
 
 	{
-		filterFile, _ := os.Open("announcementFilters.json")
-		defer filterFile.Close()
-		fileData, _ := io.ReadAll(filterFile)
-		var tags []string
-		json.Unmarshal(fileData, &tags)
+		tagsAndCategoryFile, _ := os.Open("announcementTandC.json")
+		defer tagsAndCategoryFile.Close()
+		fileData, _ := io.ReadAll(tagsAndCategoryFile)
+		var fileJson map[string][]string
+		json.Unmarshal(fileData, &fileJson)
 
 		for idx, tag := range announcement.Tags {
 			announcement.Tags[idx] = strings.ToUpper(tag[0:1]) + strings.ToLower(tag[1:])
-			if !slices.Contains(tags, announcement.Tags[idx]) {
+			if !slices.Contains(fileJson["tags"], announcement.Tags[idx]) {
 				c.Status(http.StatusBadRequest)
 				fmt.Println("ERROR: Non Existent Tag")
 				return
 			}
-
 		}
-	}
 
-	img, err := announcement.Image.Open()
-	if err != nil {
-		fmt.Println("ERROR: Could not open image")
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	_, format, err := image.DecodeConfig(img)
-	if err != nil {
-		fmt.Println("ERROR: Corrupt Image Data")
-		c.Status(http.StatusBadRequest)
-		return
+		for idx, category := range announcement.Category {
+			announcement.Category[idx] = strings.ToUpper(category[0:1]) + strings.ToLower(category[1:])
+			if !slices.Contains(fileJson["category"], announcement.Category[idx]) {
+				c.Status(http.StatusBadRequest)
+				fmt.Println("ERROR: Non Existent Category")
+				return
+			}
+		}
 	}
 
 	id, err := db.PostAnnouncementToDB(c, &announcement)
@@ -85,24 +81,17 @@ func PostAnnouncement(c *gin.Context) {
 		return
 	}
 
-	fileName := strconv.Itoa(id) + "." + format
-	if _, err := os.Stat("announcementImages/"); err != nil {
-		err := os.Mkdir("announcementImages/", 0777)
+	s3Client := helpers.NewS3Client(os.Getenv("BUCKET_NAME"), os.Getenv("REGION"), os.Getenv("RESOURCE_URI"))
 
-		if err != nil {
-			fmt.Println("Error: Could not make directory to save announcement Images")
-			return
-		}
+	imagePaths, err := s3Client.UploadImages([]*multipart.FileHeader{announcement.Image}, id, "announcement")
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to upload images"})
+		return
 	}
 
-	img.Seek(0, io.SeekStart)
-	imgBytes, _ := io.ReadAll(img)
-
-	err = os.WriteFile("announcementImages/"+fileName, imgBytes, 0777)
-	fmt.Println(fileName)
-	if err != nil {
-		fmt.Println("Error: Saving Image to Disk")
-		c.Status(http.StatusBadRequest)
+	if err = db.AddAnnouncementImageURIToDB(c, id, imagePaths[0]); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"Error": "Could not update DB with image uri"})
+		fmt.Println("ERROR: Could not update DB with image URI")
 		db.DeleteAnnouncementFromDB(c, id)
 		return
 	}
@@ -110,8 +99,8 @@ func PostAnnouncement(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetAnnouncementsFilters(c *gin.Context) {
-	filters, _ := os.Open("announcementFilters.json")
+func GetAnnouncementsTandC(c *gin.Context) {
+	filters, _ := os.Open("announcementTandC.json")
 	defer filters.Close()
 	fileData, _ := io.ReadAll(filters)
 

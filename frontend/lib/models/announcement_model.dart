@@ -5,6 +5,7 @@ class AnnouncementModel {
   final num createdAt;
   final String createdBy;
   final List<String> tags;
+	final List<String>? category;
   final String? imageUrl;
 
   AnnouncementModel({
@@ -14,6 +15,7 @@ class AnnouncementModel {
     required this.createdAt,
     required this.createdBy,
     required this.tags,
+		this.category,
     this.imageUrl
   });
 
@@ -25,7 +27,8 @@ class AnnouncementModel {
       createdAt: json['createdAt'],
       createdBy: json['createdBy'],
       tags: List<String>.from(json['tags']),
-      imageUrl: json['imageUrl'],
+			category: List<String>.from(json['category']),
+      imageUrl: json['imageURI'],
     );
   }
 }

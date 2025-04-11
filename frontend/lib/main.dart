@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:dashbaord/constants/app_theme.dart';
 import 'package:dashbaord/firebase_options.dart';
 import 'package:dashbaord/router.dart';
@@ -10,20 +12,21 @@ import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:go_router/go_router.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:url_launcher/url_launcher.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
-
 
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
-    name:"Dashboard",
+    name: "Dashboard",
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
@@ -38,13 +41,11 @@ void main() async {
   runApp(const MyApp());
 }
 
-
 Future<void> _initializeNotifications() async {
   final AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/launcher_icon');
 
-  final DarwinInitializationSettings initializationSettingsIOS =
-      DarwinInitializationSettings();
+  final DarwinInitializationSettings initializationSettingsIOS = DarwinInitializationSettings();
 
   final InitializationSettings initializationSettings = InitializationSettings(
     android: initializationSettingsAndroid,
@@ -53,8 +54,31 @@ Future<void> _initializeNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) {
-      //TODO: Handle tapping on a notification
+    onDidReceiveNotificationResponse: (NotificationResponse response) async {
+      if (response.payload != null) {
+        try {
+          final Map<String, dynamic> data = jsonDecode(response.payload!);
+
+          if (data['data'] != null && data['data'] is Map) {
+            if (data['data']['redirectURL'] != null) {
+              final String redirectURL = data['data']['redirectURL'];
+
+              final uri = Uri.parse(redirectURL);
+              if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                debugPrint('Could not launch $redirectURL');
+              }
+            }
+
+            if (data['data']['open'] != null) {
+              final String redirectRoute = data['data']['open'];
+
+              GoRouter.of(rootNavigatorKey.currentContext!).go(redirectRoute);
+            }
+          }
+        } catch (e) {
+          debugPrint('Error decoding notification payload: $e');
+        }
+      }
     },
   );
 }
@@ -66,8 +90,7 @@ Future<void> _requestNotificationPermissions() async {
     sound: true,
   );
 
-  debugPrint(
-      'User granted notification permission: ${settings.authorizationStatus}');
+  debugPrint('User granted notification permission: ${settings.authorizationStatus}');
 
   if (settings.authorizationStatus == AuthorizationStatus.authorized) {
     // For Android 12 and later, check and request permission for exact alarms
@@ -130,15 +153,14 @@ class _MyAppState extends State<MyApp> {
     final notificationBody = message.notification?.body ?? 'No Body';
 
     // Show local notification
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails('dashboard-channel',
-            'IITH Dashboard Channel', // TODO: later use good channel id and names [like differnt for each type of notification]
-            importance: Importance.max,
-            priority: Priority.high,
-            icon: 'ic_notification');
+    const AndroidNotificationDetails androidPlatformChannelSpecifics = AndroidNotificationDetails(
+        'dashboard-channel',
+        'IITH Dashboard Channel', // TODO: later use good channel id and names [like differnt for each type of notification]
+        importance: Importance.max,
+        priority: Priority.high,
+        icon: 'ic_notification');
 
-    const DarwinNotificationDetails iOSPlatformChannelSpecifics =
-        DarwinNotificationDetails();
+    const DarwinNotificationDetails iOSPlatformChannelSpecifics = DarwinNotificationDetails();
 
     const NotificationDetails platformChannelSpecifics = NotificationDetails(
       android: androidPlatformChannelSpecifics,
