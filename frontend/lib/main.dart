@@ -17,6 +17,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:url_launcher/url_launcher.dart';
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
@@ -53,18 +54,25 @@ Future<void> _initializeNotifications() async {
 
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
-    onDidReceiveNotificationResponse: (NotificationResponse response) {
+    onDidReceiveNotificationResponse: (NotificationResponse response) async {
       if (response.payload != null) {
         try {
           final Map<String, dynamic> data = jsonDecode(response.payload!);
 
-          if (data['data'] != null) {
-            if (data['data'] is Map && data['data']['open'] == 'cabsharing') {
-              GoRouter.of(navigatorKey.currentContext!).go('/cabsharing');
-            } else if (data['data'] is Map && data['data']['open'] == 'mess') {
-              GoRouter.of(navigatorKey.currentContext!).go('/mess');
-            } else if (data['data'] is Map && data['data']['open'] == 'announcements') {
-              GoRouter.of(navigatorKey.currentContext!).go('/announcements');
+          if (data['data'] != null && data['data'] is Map) {
+            if (data['data']['redirectURL'] != null) {
+              final String redirectURL = data['data']['redirectURL'];
+
+              final uri = Uri.parse(redirectURL);
+              if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+                debugPrint('Could not launch $redirectURL');
+              }
+            }
+
+            if (data['data']['open'] != null) {
+              final String redirectRoute = data['data']['open'];
+
+              GoRouter.of(rootNavigatorKey.currentContext!).go(redirectRoute);
             }
           }
         } catch (e) {

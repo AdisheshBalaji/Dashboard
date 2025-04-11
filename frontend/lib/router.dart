@@ -28,6 +28,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 class AppRouter {
   static AppRouter? _instance;
 
@@ -49,6 +51,7 @@ class AppRouter {
   late final GoRouter router = GoRouter(
     initialLocation: '/',
     observers: [_analyticsService.getAnalyticsObserver()],
+    navigatorKey: rootNavigatorKey,
     routes: [
       GoRoute(
         path: '/',

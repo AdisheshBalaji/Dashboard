@@ -29,7 +29,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             color: context.customColors.customAccentColor,
             size: 28,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.pop(context);
+            }
+          },
         ),
       ),
       centerTitle: true,
@@ -42,12 +46,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       actions: actions,
-      bottom: bottom ??
-          PreferredSize(preferredSize: Size.zero, child: SizedBox.shrink()),
+      bottom: bottom ?? PreferredSize(preferredSize: Size.zero, child: SizedBox.shrink()),
     );
   }
 
   @override
-  Size get preferredSize =>
-      Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
+  Size get preferredSize => Size.fromHeight(kToolbarHeight + (bottom?.preferredSize.height ?? 0));
 }
