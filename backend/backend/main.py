@@ -149,11 +149,14 @@ class NotificationRequest(BaseModel):
     body: str
     image_url: Optional[str] = None
     test: Optional[bool] = True
+    redirect_url: Optional[str] = None
+    notification_type: Optional[str] = None
+    extra_data: Optional[dict] = None
 
 @app.post("/send-notifications")
 async def send_notifications(payload: NotificationRequest, user_id: int = Depends(get_user_id)):
     if user_id not in {1, 41}:
         raise HTTPException(status_code=403, detail="Forbidden")
 
-    send_notifications_to_all_users(payload.title, payload.body, payload.image_url, test=payload.test)
+    send_notifications_to_all_users(payload.title, payload.body, payload.image_url, test=payload.test, redirect_url=payload.redirect_url, notification_type=payload.notification_type, extra_data=payload.extra_data)
     return {"message": "Notifications sent"}
