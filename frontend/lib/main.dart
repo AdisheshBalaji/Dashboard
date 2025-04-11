@@ -55,12 +55,12 @@ Future<void> _initializeNotifications() async {
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onDidReceiveNotificationResponse: (NotificationResponse response) async {
-      if (response.payload != null) {
+      if (response.payload != null && response.payload != '') {
         try {
           final Map<String, dynamic> data = jsonDecode(response.payload!);
 
-          if (data['data'] != null && data['data'] is Map) {
-            if (data['data']['redirectURL'] != null) {
+          if (data['data'] != null && data['data'] != '' && data['data'] is Map) {
+            if (data['data']['redirectURL'] != null && data['data']['redirectURL'] != '') {
               final String redirectURL = data['data']['redirectURL'];
 
               final uri = Uri.parse(redirectURL);
@@ -69,7 +69,7 @@ Future<void> _initializeNotifications() async {
               }
             }
 
-            if (data['data']['open'] != null) {
+            if (data['data']['open'] != null && data['data']['open'] != '') {
               final String redirectRoute = data['data']['open'];
 
               GoRouter.of(rootNavigatorKey.currentContext!).go(redirectRoute);
