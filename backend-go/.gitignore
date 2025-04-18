@@ -34,3 +34,4 @@ main
 
 *.json
 !announcementTandC.json
+d-prod
