@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:dashbaord/constants/app_theme.dart';
 import 'package:dashbaord/firebase_options.dart';
@@ -58,22 +59,22 @@ Future<void> _initializeNotifications() async {
       if (response.payload != null && response.payload != '') {
         try {
           final Map<String, dynamic> data = jsonDecode(response.payload!);
+          log('Notification: ${data.toString()}');
 
-          if (data['data'] != null && data['data'] != '' && data['data'] is Map) {
-            if (data['data']['redirectURL'] != null && data['data']['redirectURL'] != '') {
-              final String redirectURL = data['data']['redirectURL'];
+          if (data['redirectURL'] != null && data['redirectURL'] != '') {
+            final String redirectURL = data['redirectURL'];
 
-              final uri = Uri.parse(redirectURL);
-              if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-                debugPrint('Could not launch $redirectURL');
-              }
+            final uri = Uri.parse(redirectURL);
+            if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+              debugPrint('Could not launch $redirectURL');
             }
+            return;
+          }
 
-            if (data['data']['open'] != null && data['data']['open'] != '') {
-              final String redirectRoute = data['data']['open'];
+          if (data['open'] != null && data['open'] != '') {
+            final String redirectRoute = data['open'];
 
-              GoRouter.of(rootNavigatorKey.currentContext!).go(redirectRoute);
-            }
+            GoRouter.of(rootNavigatorKey.currentContext!).go('/$redirectRoute');
           }
         } catch (e) {
           debugPrint('Error decoding notification payload: $e');
@@ -168,11 +169,8 @@ class _MyAppState extends State<MyApp> {
     );
 
     await flutterLocalNotificationsPlugin.show(
-      0,
-      notificationTitle,
-      notificationBody,
-      platformChannelSpecifics,
-    );
+        0, notificationTitle, notificationBody, platformChannelSpecifics,
+        payload: jsonEncode(message.data));
   }
 
   getAuthStatus() {
