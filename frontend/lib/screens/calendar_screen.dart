@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/services/api_service.dart';
@@ -22,7 +23,8 @@ import 'package:share_plus/share_plus.dart';
 
 class CalendarScreen extends StatefulWidget {
   final Timetable? timetable;
-  final Function(String, String, List<Lecture>, String?, String?)? onLectureAdded;
+  final Function(String, String, List<Lecture>, String?, String?)?
+      onLectureAdded;
   final Function(Timetable)? onEditTimetable;
 
   const CalendarScreen({
@@ -109,66 +111,72 @@ class _CalendarScreenState extends State<CalendarScreen> {
       controller: EventController()..addAll(_events),
       child: Scaffold(
         appBar: CustomAppBar(
-          title: 
-            "Calendar",
+          title: "Calendar",
           actions: [
-            PopupMenuButton<String>(
-              onSelected: (value) async {
-                if (value == "refresh") {
-                  final response = await ApiServices().getTimetable(context);
-                  if (response == null) {
-                    showError(msg: "Failed to fetch timetable");
-                    return;
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: PopupMenuButton<String>(
+                iconColor: context.customColors.customAccentColor,
+                onSelected: (value) async {
+                  if (value == "refresh") {
+                    final response = await ApiServices().getTimetable(context);
+                    if (response == null) {
+                      showError(msg: "Failed to fetch timetable");
+                      return;
+                    }
+                    setState(() {
+                      timetable = response;
+                    });
+                    SharedService().saveTimetable(response);
+                  } else if (value == "manageCourses") {
+                    _showManageCoursesBottomSheet(context);
+                  } else if (value == "shareCode") {
+                    _shareSchedule();
                   }
-                  setState(() {
-                    timetable = response;
-                  });
-                  SharedService().saveTimetable(response);
-                } else if (value == "manageCourses") {
-                  _showManageCoursesBottomSheet(context);
-                } else if (value == "shareCode") {
-                  _shareSchedule();
-                }
-              },
-              itemBuilder: (BuildContext context) => [
-                PopupMenuItem<String>(
-                  value: "refresh",
-                  child: Row(
-                    children: [
-                      Icon(Icons.refresh, color: Colors.redAccent),
-                      SizedBox(width: 5),
-                      Text("Refresh"),
-                    ],
+                },
+                itemBuilder: (BuildContext context) => [
+                  PopupMenuItem<String>(
+                    value: "refresh",
+                    child: Row(
+                      children: [
+                        Icon(Icons.refresh,
+                            color: context.customColors.customAccentColor),
+                        SizedBox(width: 5),
+                        Text("Refresh"),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem<String>(
-                  value: "manageCourses",
-                  child: Row(
-                    children: [
-                      Icon(Icons.settings, color: Colors.redAccent),
-                      SizedBox(width: 5),
-                      Text("Manage Courses"),
-                    ],
+                  PopupMenuItem<String>(
+                    value: "manageCourses",
+                    child: Row(
+                      children: [
+                        Icon(Icons.settings,
+                            color: context.customColors.customAccentColor),
+                        SizedBox(width: 5),
+                        Text("Manage Courses"),
+                      ],
+                    ),
                   ),
-                ),
-                PopupMenuItem<String>(
-                  value: "shareCode",
-                  child: Row(
-                    children: [
-                      Icon(Icons.share, color: Colors.redAccent),
-                      SizedBox(width: 5),
-                      Text("Share Timetable"),
-                    ],
+                  PopupMenuItem<String>(
+                    value: "shareCode",
+                    child: Row(
+                      children: [
+                        Icon(Icons.share,
+                            color: context.customColors.customAccentColor),
+                        SizedBox(width: 5),
+                        Text("Share Timetable"),
+                      ],
+                    ),
                   ),
+                ],
+                icon: Icon(Icons.more_vert),
+                color: Theme.of(context).cardColor,
+                elevation: 4,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
                 ),
-              ],
-              icon: Icon(Icons.more_vert),
-              color: Theme.of(context).cardColor,
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
               ),
-            ),
+            )
           ],
         ),
         body: Column(
@@ -188,7 +196,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               },
               borderRadius: BorderRadius.circular(10),
               selectedColor: Colors.white,
-              fillColor: Colors.red,
+              fillColor: context.customColors.customAccentColor,
               constraints: BoxConstraints(
                 minHeight: 40.0,
                 minWidth: MediaQuery.of(context).size.width * 2 / 9,
@@ -271,7 +279,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
               timetable =
                   timetable!.addCourse(courseCode, courseName, lectures);
             });
-            widget.onLectureAdded!(courseCode, courseName, lectures, classRoom, slot);
+            widget.onLectureAdded!(
+                courseCode, courseName, lectures, classRoom, slot);
           },
         );
         // return const AddEventBottomSheet();
@@ -306,7 +315,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         onPressed: () {
           _showAddEventBottomSheet(context);
         },
-        backgroundColor: Colors.red,
+        backgroundColor: context.customColors.customAccentColor,
         child: Icon(
           CupertinoIcons.add,
           color: Colors.white,

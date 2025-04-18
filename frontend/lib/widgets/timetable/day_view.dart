@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:flutter/material.dart';
@@ -88,7 +89,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
   }
 
   final DatePickerController _controller = DatePickerController();
-  
+
   @override
   void initState() {
     super.initState();
@@ -114,7 +115,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
             controller: _controller,
             initialSelectedDate: currentDate,
             selectionColor: Theme.of(context).cardColor,
-            selectedTextColor: Colors.redAccent,
+            selectedTextColor: context.customColors.customAccentColor,
             deactivatedColor: Theme.of(context).textTheme.bodyMedium!.color!,
             dateTextStyle: GoogleFonts.inter(
               fontWeight: FontWeight.w700,

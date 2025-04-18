@@ -1,3 +1,4 @@
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
 import 'package:dashbaord/utils/normal_text.dart';
@@ -136,10 +137,14 @@ class ManageLecturesBottomSheetState extends State<ManageLecturesBottomSheet> {
                     onPressed: () {
                       _showSlotPicker();
                     },
-                    icon: Icon(Icons.add, size: 18, color: Colors.white,),
+                    icon: Icon(
+                      Icons.add,
+                      size: 18,
+                      color: Colors.white,
+                    ),
                     label: const Text("Add Slot"),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: context.customColors.customAccentColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 1),
@@ -166,7 +171,7 @@ class ManageLecturesBottomSheetState extends State<ManageLecturesBottomSheet> {
                       });
                     },
                     background: Container(
-                      color: Colors.redAccent,
+                      color: context.customColors.customAccentColor,
                       alignment: Alignment.centerRight,
                       padding: const EdgeInsets.only(right: 16.0),
                       child: const Icon(
@@ -192,8 +197,9 @@ class ManageLecturesBottomSheetState extends State<ManageLecturesBottomSheet> {
                                       .bodyLarge
                                       ?.color),
                               IconButton(
-                                icon:
-                                    Icon(Icons.delete, color: Colors.redAccent),
+                                icon: Icon(Icons.delete,
+                                    color:
+                                        context.customColors.customAccentColor),
                                 onPressed: () {
                                   // Add a confirm dialog if you want to ask before deleting
                                   setState(() {
@@ -216,7 +222,7 @@ class ManageLecturesBottomSheetState extends State<ManageLecturesBottomSheet> {
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       shape: const CircleBorder(),
-                      backgroundColor: Colors.red,
+                      backgroundColor: context.customColors.customAccentColor,
                       padding: const EdgeInsets.all(16),
                     ),
                     onPressed: () {
@@ -280,7 +286,7 @@ class ManageLecturesBottomSheetState extends State<ManageLecturesBottomSheet> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
+                backgroundColor: context.customColors.customAccentColor,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),

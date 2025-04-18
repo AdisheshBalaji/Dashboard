@@ -3,7 +3,7 @@ BINARY_NAME := "d-prod"
 BACKUP_BINARY_NAME := "d-prod-backup"
 BUILD_DIR := "./backend-go"
 REMOTE_USER := "ubuntu"
-REMOTE_HOST := "api.iith.dev"
+REMOTE_HOST := "aws.iith.dev"
 REMOTE_PATH := "/home/ubuntu/backend"
 TMUX_SESSION := "backend"
 
@@ -48,7 +48,7 @@ create-service: build-backend push-templates
 
     # ssh {{REMOTE_USER}}@{{REMOTE_HOST}} "systemctl daemon-reload && systemctl enable {{BINARY_NAME}}.service"
 
-deploy: export-env create-service init-tables
+deploy: export-env create-service
     scp -r {{BUILD_DIR}}/{{BINARY_NAME}} {{REMOTE_USER}}@{{REMOTE_HOST}}:{{REMOTE_PATH}}
     ssh {{REMOTE_USER}}@{{REMOTE_HOST}} "\
         sudo mv {{REMOTE_PATH}}/{{BINARY_NAME}} /usr/local/bin/{{BINARY_NAME}} && \
