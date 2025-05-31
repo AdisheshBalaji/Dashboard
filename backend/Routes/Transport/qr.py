@@ -40,7 +40,7 @@ class ScanQRModel(BaseModel):
 async def process_transaction(request: Request, transaction: TransactionRequest):
     user_id = get_user_id(request)
 
-    payment_time = datetime.now().strftime("%H:%M %d/%m/%y")
+    payment_time = datetime.now().strftime("%Y-%m-%dT%H:%M:00")
     travel_date = datetime.now().strftime("%d/%m/%y")
     bus_timing = "14:30"
 
@@ -107,7 +107,7 @@ async def process_transaction(request: Request, transaction: TransactionRequest)
             # Prepare the response
             response = TransactionResponse(
                 transactionId=transaction.transactionId,
-                paymentTime=payment_time.strftime("%H:%M %d/%m/%y"),
+                paymentTime=payment_time.strftime("%d %b %Y, %I:%M %p"),
                 travelDate=travel_date.strftime("%d/%m/%y"),
                 busTiming=bus_timing.strftime("%H:%M"),
                 isUsed=is_used

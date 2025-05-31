@@ -1,8 +1,7 @@
-import datetime
 import os
 from Routes.Auth.cookie import get_user_id, set_cookie
 from Routes.User.user import get_user
-from fastapi import Depends, FastAPI, HTTPException, Request, Response, Form
+from fastapi import Depends, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
@@ -14,15 +13,12 @@ from Routes.Lost_and_Found.lost import router as lost_router
 from Routes.Auth.controller import router as auth_router
 from Routes.CabSharing.controller import app as cab_router
 from Routes.User.controller import router as user_router
-from lambda_verse import app as lambda_verse_router
 from Routes.Auth.tokens import verify_token
 from fastapi.responses import JSONResponse
 from Routes.Transport.transport_schedule import router as transport_router
-from Routes.Transport.qr import router as transaction_verification_route
-from Routes.notif import send_notifications_to_all_users
-from Routes.Merch.merch import router as merch_router
-from typing import Optional
-from pydantic import BaseModel
+import httpx
+from fastapi.responses import RedirectResponse
+
 
 load_dotenv()
 
@@ -33,9 +29,7 @@ domains = os.getenv("ALLOWED_DOMAINS", "").split(",")
 # TODO: change for prod
 origins = [
     "http://localhost:5500",
-    "http://localhost:5000",
     "http://localhost:8080",
-    "http://localhost:34261"
 ] + domains
 
 app.add_middleware(
@@ -55,9 +49,6 @@ app.include_router(lost_router)
 app.include_router(cab_router)
 app.include_router(user_router)
 app.include_router(transport_router)
-app.include_router(transaction_verification_route)
-app.include_router(merch_router)
-app.include_router(lambda_verse_router)
 
 async def cookie_verification_middleware(request: Request, call_next):
     if request.method == "OPTIONS":
@@ -73,14 +64,14 @@ async def cookie_verification_middleware(request: Request, call_next):
     else:
         return JSONResponse(status_code=401, content={"detail": "Session cookie is missing"})
     response = await call_next(request)
-
+    
     #updating the cookie
     set_cookie(response=response, key="session", value=token, days_expire=15)
     return response
 
 @app.middleware("http")
 async def apply_middleware(request: Request, call_next):
-    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/transport/cityBus", "/mess_menu/"]  # Add routes to exclude guard here
+    excluded_routes = ["/auth/login", "/auth/logout", "/docs", "/openapi.json", "/transport/", "/mess_menu/"]  # Add routes to exclude guard here
 
     if request.url.path not in excluded_routes:
         return await cookie_verification_middleware(request, call_next)
@@ -90,7 +81,8 @@ async def apply_middleware(request: Request, call_next):
 
 @app.get("/")
 async def root():
-    return {"message": f"hello dashboard"}
+    return RedirectResponse(url="https://dashboard.iith.dev", status_code=308)
+    # return {"message": f"hello dashboard"}
 
 @app.options("/{path:path}")
 def options_handler(request: Request, path: str):
@@ -112,6 +104,7 @@ def get_session_info(response: Response):
 
 @app.get("/main-gate/status")
 async def get_main_gate_status(user_id: int = Depends(get_user_id)):
+
     return JSONResponse(content="Non-Authoritative Information", status_code=203)
 
     user_details = get_user(user_id=user_id)
@@ -143,24 +136,3 @@ async def get_main_gate_status(user_id: int = Depends(get_user_id)):
         else:
             return response_data, 200
 
-
-class NotificationRequest(BaseModel):
-    title: str
-    body: str
-    image_url: Optional[str] = None
-    test: Optional[bool] = True
-    redirect_url: Optional[str] = None
-    notification_type: Optional[str] = None
-    extra_data: Optional[dict] = None
-
-@app.post("/send-notifications")
-async def send_notifications(payload: NotificationRequest, user_id: int = Depends(get_user_id)):
-    if user_id not in {1, 41, 1695}:
-        raise HTTPException(status_code=403, detail="Forbidden")
-    if user_id == 1695:
-        test = True
-    else:
-        test = payload.test
-
-    send_notifications_to_all_users(payload.title, payload.body, payload.image_url, test=test, redirect_url=payload.redirect_url, notification_type=payload.notification_type, extra_data=payload.extra_data)
-    return {"message": "Notifications sent"}

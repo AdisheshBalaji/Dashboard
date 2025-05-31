@@ -11,9 +11,14 @@ def get_user(user_id: int) -> Optional[Dict[str, str]]:
              .select('*')
              .where(users.id == user_id))
 
-    with conn.cursor() as cursor:
-        cursor.execute(query.get_sql(), (user_id,))
-        user = cursor.fetchone()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute(query.get_sql(), (user_id,))
+            user = cursor.fetchone()
+    except Exception as e:
+        conn.rollback()  # IMPORTANT!!!
+        raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
+    
     if user:
         return {
             "id": user[0],

@@ -78,7 +78,7 @@ def get_last_transaction(user_id: int) -> Optional[Dict[str, Any]]:
                 columns = [desc[0] for desc in cur.description]
                 transaction = dict(zip(columns, result))
                 transaction["transactionId"] = transaction.pop("transaction_id")
-                transaction["paymentTime"] = transaction.pop("payment_time").strftime("%H:%M")
+                transaction["paymentTime"] = transaction.pop("payment_time").strftime("%Y-%m-%dT%H:%M:00")
                 transaction["travelDate"] = transaction.pop("travel_date").strftime("%d/%m/%y")
                 transaction["busTiming"] = transaction.pop("bus_timing").strftime("%H:%M")
                 transaction["amount"] = str(transaction["amount"])
