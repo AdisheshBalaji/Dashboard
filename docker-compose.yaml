@@ -2,10 +2,11 @@
 services:
   backend:
     image: ghcr.io/lambdaiith/dashboard:latest
+    # build: ./backend # Uncomment this line if you want to build the image locally
     container_name: dashboard-backend
     restart: always
     ports:
-      - "8000:1234"
+      - "1234:8000"
     env_file:
       - ./backend/.env
     volumes:
