@@ -1,4 +1,3 @@
-from backend.backend import queries
 from fastapi import Form, HTTPException, Request, APIRouter
 from fastapi.responses import JSONResponse
 from datetime import datetime

@@ -17,6 +17,8 @@ POSTGRES_PASS = os.getenv("POSTGRES_PASS")
 POSTGRES_HOST = os.getenv("POSTGRES_HOST")
 POSTGRES_PORT = os.getenv("POSTGRES_PORT")
 
+conn = None
+
 try: 
     conn = psycopg2.connect(
         database=DATABASE,
@@ -30,7 +32,9 @@ except:
     print("Connection Failed")
 
 print("Opened database successfully!")
-queries = aiosql.from_path("sql", "psycopg2")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SQL_DIR = os.path.join(BASE_DIR, "sql")
+queries = aiosql.from_path(SQL_DIR, "psycopg2")
 
 conn.autocommit = False
 
