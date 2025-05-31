@@ -56,11 +56,11 @@ gc = gspread.authorize(creds)
 
 
 sh = gc.open_by_url(
-    "https://docs.google.com/spreadsheets/d/1T0KxKwujTUY-itYoFcVQ4S8EHhhRG3EuNLttHTv-yy0/edit?gid=0#gid=0"
+    "https://docs.google.com/spreadsheets/d/1-Kekt-ywamjEujQqoH_wrUu4SMzx146CBitiqM9RokU/edit"
 )
 
-weekly = sh.worksheet("main menu")
-additionals = sh.worksheet("extras")
+weekly = sh.worksheet("Main Menu")
+additionals = sh.worksheet("Extras")
 
 
 weekly_grid = numpy.array(weekly.get_all_values())

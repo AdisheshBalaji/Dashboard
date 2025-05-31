@@ -30,9 +30,7 @@ pytz = "^2024.1"
 regex = "^2024.11.6"
 firebase-admin = "^6.7.0"
 
-
-
-[tool.poetry.group.dev.dependencies]
+[tool.poetry.dev-dependencies]
 flake8 = "^7.0.0"
 
 [build-system]

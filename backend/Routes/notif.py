@@ -12,11 +12,9 @@ if not firebase_admin._apps:
 def send_personalized_fcm_notification(token, title, body, image_url=None, redirect_url=None, notification_type=None, extra_data=None):
     """Sends an FCM notification to a specific device with data payload support."""
     data_payload = {
-        "data":{
-            "redirectURL": redirect_url or "",  
-            "open": notification_type or "home",
-            "timestamp": str(int(time.time()))
-        }
+        "redirectURL": redirect_url or "",  
+        "open": notification_type or "home",
+        "timestamp": str(int(time.time()))
     }
 
     if extra_data:
@@ -44,7 +42,7 @@ def get_all_fcm_tokens(test = True):
     """Fetches all FCM tokens from the database."""
     tokens = []
     if test:
-        query = "SELECT fcm.token, u.name FROM fcm_tokens fcm JOIN users u ON fcm.user_id = u.id where u.id in (1, 41)"
+        query = "SELECT fcm.token, u.name FROM fcm_tokens fcm JOIN users u ON fcm.user_id = u.id where u.id in (1, 1695)"
     else: 
         query = "SELECT fcm.token, u.name FROM fcm_tokens fcm JOIN users u ON fcm.user_id = u.id"
 

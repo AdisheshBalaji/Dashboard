@@ -122,8 +122,9 @@ def post_edit_timetable(request: Request, timetable: Timetable):
     user_id = get_user_id(request)
 
     validation_result = validate_course_schedule(timetable.model_dump())
-    if not isinstance(validation_result, bool):
-        raise HTTPException(status_code=400, detail=validation_result)
+    print(validation_result)
+    # if not isinstance(validation_result, bool):
+        # raise HTTPException(status_code=400, detail=validation_result)
 
     try:
         query = timetable_queries.post_timetable(user_id, timetable)
@@ -133,6 +134,7 @@ def post_edit_timetable(request: Request, timetable: Timetable):
         return {"message": "Timetable Updated Successfully"}
     except Exception as e:
         conn.rollback()
+        print(e)
         raise HTTPException(
             status_code=500, detail=f"Internal Server Error : {e}")
 
