@@ -41,6 +41,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/Dashboard
-            docker-compose pull
-            docker-compose down
-            docker-compose up -d
+            echo ${{ secrets.GH_TOKEN }} | sudo docker login ghcr.io -u bhaskaraa45 --password-stdin
+            sudo docker compose pull
+            sudo docker compose down
+            sudo docker compose up -d
