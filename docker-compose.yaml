@@ -8,16 +8,16 @@ services:
     ports:
       - "1234:8000"
     env_file:
-      - ~/dashboard-production/.env
+      - /home/ubuntu/dashboard-production/.env
     volumes:
-      - ~/dashboard-production/credentials.json:/backend/job_scripts/credentials.json
-      - ~/dashboard-production/0.json:/backend/Routes/MessMenu/0.json
-      - ~/dashboard-production/1.json:/backend/Routes/MessMenu/1.json
-      - ~/dashboard-production/2.json:/backend/Routes/MessMenu/2.json
-      - ~/dashboard-production/3.json:/backend/Routes/MessMenu/3.json
-      - ~/dashboard-production/config.json:/backend/Routes/MessMenu/config.json
-      - ~/dashboard-production/cityBus.json:/backend/Routes/Transport/cityBus.json
-      - ~/dashboard-production/transport.json:/backend/Routes/Transport/transport.json
-      - ~/dashboard-production/all_courses.json:/backend/Routes/TimeTable/all_courses.json
-      - ~/dashboard-production/serviceAccount.json:/backend/serviceAccount.json
+      - /home/ubuntu/dashboard-production/credentials.json:/backend/job_scripts/credentials.json
+      - /home/ubuntu/dashboard-production/0.json:/backend/Routes/MessMenu/0.json
+      - /home/ubuntu/dashboard-production/1.json:/backend/Routes/MessMenu/1.json
+      - /home/ubuntu/dashboard-production/2.json:/backend/Routes/MessMenu/2.json
+      - /home/ubuntu/dashboard-production/3.json:/backend/Routes/MessMenu/3.json
+      - /home/ubuntu/dashboard-production/config.json:/backend/Routes/MessMenu/config.json
+      - /home/ubuntu/dashboard-production/cityBus.json:/backend/Routes/Transport/cityBus.json
+      - /home/ubuntu/dashboard-production/transport.json:/backend/Routes/Transport/transport.json
+      - /home/ubuntu/dashboard-production/all_courses.json:/backend/Routes/TimeTable/all_courses.json
+      - /home/ubuntu/dashboard-production/serviceAccount.json:/backend/serviceAccount.json
     command: uvicorn main:app --host 0.0.0.0 --port 8000
