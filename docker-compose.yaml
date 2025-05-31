@@ -1,0 +1,22 @@
+
+services:
+  backend:
+    image: ghcr.io/lambdaiith/dashboard:latest
+    container_name: dashboard-backend
+    restart: always
+    ports:
+      - "8000:1234"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend/job_scripts/credentials.json:/backend/job_scripts/credentials.json
+      - ./backend/Routes/MessMenu/0.json:/backend/Routes/MessMenu/0.json
+      - ./backend/Routes/MessMenu/1.json:/backend/Routes/MessMenu/1.json
+      - ./backend/Routes/MessMenu/2.json:/backend/Routes/MessMenu/2.json
+      - ./backend/Routes/MessMenu/3.json:/backend/Routes/MessMenu/3.json
+      - ./backend/Routes/MessMenu/config.json:/backend/Routes/MessMenu/config.json
+      - ./backend/Routes/Transport/cityBus.json:/backend/Routes/Transport/cityBus.json
+      - ./backend/Routes/Transport/transport.json:/backend/Routes/Transport/transport.json
+      - ./backend/Routes/TimeTable/all_courses.json:/backend/Routes/TimeTable/all_courses.json
+      - ./backend/serviceAccount.json:/backend/serviceAccount.json
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
