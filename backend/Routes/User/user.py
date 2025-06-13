@@ -3,6 +3,7 @@
 from typing import List, Optional, Dict
 from pypika import Table, Query
 from utils import conn 
+from fastapi import HTTPException
 
 users = Table("users")
 
