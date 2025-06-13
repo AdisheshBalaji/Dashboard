@@ -4,10 +4,13 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     POETRY_VERSION=1.8.2 \
     PATH="/root/.local/bin:$PATH" \
-    PYTHONPATH="/backend/"
+    PYTHONPATH="/backend/" \
+    TZ=Asia/Kolkata
 
 RUN apt-get update \
-    && apt-get install -y curl build-essential libpq-dev \
+    && apt-get install -y curl build-essential libpq-dev tzdata \
+    && ln -snf /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo $TZ > /etc/timezone \
     && curl -sSL https://install.python-poetry.org | python3 - \
     && apt-get clean
 
