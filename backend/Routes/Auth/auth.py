@@ -21,22 +21,9 @@ def verify_id_token(token):
     # return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
     request_adapter = Request()
     try:
-        id_info = id_token.verify_oauth2_token(token, request_adapter, client_id)
-        return True, id_info
-    except GoogleAuthError as e:
-        try:
-            id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
-            return True, id_info
-        except GoogleAuthError as e:
-            print("JERE")
-            return False, f"Token verification failed: {e}"
-        return False, f"Token verification failed: {e}"
-    
-    try:
         id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
         return True, id_info
     except GoogleAuthError as e:
-        print("JERE 2")
         return False, f"Token verification failed: {e}"
 
 def handle_login(id_token):
