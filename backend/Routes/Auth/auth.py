@@ -44,7 +44,6 @@ def handle_login(id_token):
 
 def is_valid_iith_email(email):
     if email == "iithdashboard@gmail.com":
-        print("HEHE ", email)
         return True
     pattern = r'^[a-zA-Z0-9._%+-]+@(?:[a-zA-Z0-9-]+\.)?iith\.ac\.in$'
     return re.match(pattern, email) is not None

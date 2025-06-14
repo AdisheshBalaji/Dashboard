@@ -122,7 +122,6 @@ def post_edit_timetable(request: Request, timetable: Timetable):
     user_id = get_user_id(request)
 
     validation_result = validate_course_schedule(timetable.model_dump())
-    print(validation_result)
     # if not isinstance(validation_result, bool):
         # raise HTTPException(status_code=400, detail=validation_result)
 
