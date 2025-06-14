@@ -70,7 +70,6 @@ async def get_all_found_item_names() -> List[Dict[str, Any]]:
 def show_found_items(id: int) -> LfResponse:
     try:   
         with conn.cursor() as cur: 
-            print('hello')
             cur.execute(get_particular_found_item(id))
             found_item = cur.fetchall()
             

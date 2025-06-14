@@ -75,7 +75,6 @@ async def get_current_week_number(request: Request):
     
     try:
         user_id = get_user_id(request)
-        print(user_id)
         user_details = get_user(user_id=user_id)
         if user_details['email'] in admins:
             isAdmin = True

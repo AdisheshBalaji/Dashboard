@@ -17,11 +17,6 @@ async def add_item( request: Request,
                     )  -> Dict[str, Any]:
     
     try:
-        if images is not None:
-            print(f"Number of images received: {len(images)}")
-            for image in images:
-                print(f"Image filename: {image.filename}, Content Type: {image.content_type}")
-
         user_id = get_user_id(request)
 
         if images is not None:
