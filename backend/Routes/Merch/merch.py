@@ -82,6 +82,7 @@ def get_items():
             })
         return result
     except Exception as e:
+        conn.rollback()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch merchandise items: {str(e)}"
