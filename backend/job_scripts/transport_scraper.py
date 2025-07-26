@@ -51,7 +51,7 @@ unusable_data_points = ['', ' ', '-', 'Break']
 
 # fetching bus data from columns
 
-for bus_num in range(1, 4):
+for bus_num in range(1, 5):
     bus = sheet.col_values(bus_num + 1)[2:]
     for i, time in enumerate(bus):
         if time not in unusable_data_points:
@@ -66,9 +66,9 @@ bus_data = {key: sorted(value) for key, value in bus_data.items()}
 bus_data = {key: [str(value) for value in values] for key, values in bus_data.items()}
 
 #! fetching EV data----------------------------------------------------------
-EV_directions = sheet.col_values(6)[2:]
+EV_directions = sheet.col_values(7)[2:]
 EV_unique_directions = reduce(lambda x, y: x if y in x else x + [y], [[], ] + EV_directions)
-EV_times = sheet.col_values(7)[2:]
+EV_times = sheet.col_values(8)[2:]
 
 EV_data = {EV_unique_directions[i]: [] for i in range(len(EV_unique_directions))}
 
