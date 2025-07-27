@@ -101,54 +101,47 @@ def clean(text: str):
 # -------------------------------------------------------------------------------
 # Takes contents of a cell and splits it into multiple
 def parse_cell_items(text: str):
+    text = text.strip()
 
-    # Check for empty input
-    if text.strip() == "":
+    if text == "":
         return []
 
-    # Numbered list
+    items = []
+
+    # Numbered list detection
     if text.lstrip().startswith("1."):
-        # No other delimiters
-        items = []
         for line in text.split("\n"):
             spl = line.lstrip().split(".", 1)
             if len(spl) > 1 and spl[0].isdigit():
-                # New item
-                if spl[1].find(",") != -1:
-                    if spl[1].find("(") != -1 and spl[1].index("(") < spl[1].index(
-                        ","
-                    ) < spl[1].index(")"):
-                        pass
-                    else:
-                        for a in spl[1].split(","):
-                            items.append(clean(a))
+                content = spl[1].strip()
+                # Handle multiple items in one line
+                if "," in content and not (("(" in content) and (content.index("(") < content.index(",") < content.index(")"))):
+                    for a in content.split(","):
+                        items.append(clean(a))
                 else:
-                    items.append(clean(spl[1]))
+                    items.append(clean(content))
             else:
-                # There's a \n in the middle of an item :facepalm:
-                # Append it to the previous item
                 if spl[0].strip() == "":
-                    # Its an empty line in the middle of a numbered list..., double facepalm
                     continue
-                items[-1] += " " + clean(spl[0]).replace("\n", "")
+                if items:
+                    items[-1] += " " + clean(spl[0]).replace("\n", "")
+                else:
+                    items.append(clean(spl[0]).replace("\n", ""))
         return items
 
-    items = []
-    delims = ",+\n"
-    for delim in delims:
+    # Fallback: comma, plus, or newline-separated
+    for delim in [",", "+", "\n"]:
         if delim in text:
-            if text.find("(") != -1:
-                if text.index("(") < text.index(delim) < text.index(")"):
-                    continue
+            if "(" in text and (text.index("(") < text.index(delim) < text.index(")")):
+                continue
             for item in text.split(delim):
-                if item.strip() == "":
-                    continue
-                items.append(clean(item).replace("\n", ""))
-            # Assumption: only one delimiter per cell
+                if item.strip():
+                    items.append(clean(item).replace("\n", ""))
             break
     else:
         # Single item
         items.append(clean(text).replace("\n", ""))
+
     return items
 
 
