@@ -31,6 +31,8 @@ def verify_id_token(token):
 def handle_login(id_token):
     ok, data = verify_id_token(id_token)
     print("handle login called")
+    print(ok)
+    print(data)
     if not ok:
         return False, "", {"error": "Invalid ID token", "status": 401}
 
