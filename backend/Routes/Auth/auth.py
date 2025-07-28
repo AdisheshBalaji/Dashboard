@@ -20,7 +20,6 @@ ios_client_id = os.getenv("IOS_GOOGLE_CLIENT_ID")
 
 def verify_id_token(token):
     request_adapter = Request()
-    print("verify id token called")
     
     try:
         id_info = id_token.verify_oauth2_token(token, request_adapter, client_id)
@@ -34,9 +33,6 @@ def verify_id_token(token):
 
 def handle_login(id_token):
     ok, data = verify_id_token(id_token)
-    print("handle login called")
-    print(ok)
-    print(data)
     if not ok:
         return False, "", {"error": "Invalid ID token", "status": 401}
 

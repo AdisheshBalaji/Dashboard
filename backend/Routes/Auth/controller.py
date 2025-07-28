@@ -19,12 +19,7 @@ class AccessTokenRequest(BaseModel):
 @router.post("/login")
 def login(login_request: LoginRequest, response: Response):
     id_token = login_request.id_token
-    print(id_token)
-    print("login router")
     status, token,  msg = handle_login(id_token)
-    print(status)
-    print(token)
-    print(msg)
     if status:
         response = JSONResponse(content=msg)
         set_cookie(response, key="session", value=token)
