@@ -4,13 +4,14 @@ import requests as req
 from dotenv import load_dotenv
 from google.oauth2 import id_token
 from google.auth.exceptions import GoogleAuthError
+from google.auth.transport.requests import Request
+
 from Routes.Auth.tokens import generate_token
 from models import User
 from utils import conn
 from queries import user as user_queries
 from pypika import Query
 from queries.user import users
-from google.auth.transport.requests import Request
 
 load_dotenv()
 
@@ -18,8 +19,8 @@ client_id = os.getenv("GOOGLE_CLIENT_ID")
 ios_client_id = os.getenv("IOS_GOOGLE_CLIENT_ID")
 
 def verify_id_token(token):
-    # return True, {"email": "ms22btech11010@iith.ac.in", "name": "Bhaskar"}
     request_adapter = Request()
+    print("verify id token called")
     try:
         id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
         return True, id_info
@@ -28,14 +29,14 @@ def verify_id_token(token):
 
 def handle_login(id_token):
     ok, data = verify_id_token(id_token)
+    print("handle login called")
     if not ok:
         return False, "", {"error": "Invalid ID token", "status": 401}
 
     if not is_valid_iith_email(data["email"]):
         return False, "", {"error": "Please use an IITH email", "status": 401}
-   
+
     exists, user_id = is_user_exists(data["email"])
-    
     if not exists:
         user_id = insert_user(email=data["email"], name=data["name"])
 
@@ -54,6 +55,7 @@ def insert_user(email: str, name: str):
             insert_query = user_queries.post_user(email, name)
             cursor.execute(insert_query)
             conn.commit()
+
             select_query = Query.from_(users).select(users.id).where(users.email == email)
             cursor.execute(select_query.get_sql())
             user_id = cursor.fetchone()[0]
@@ -71,4 +73,3 @@ def is_user_exists(email: str):
             return (True, result[0]) if result else (False, None)
         except Exception as e:
             raise
-
