@@ -23,10 +23,14 @@ def verify_id_token(token):
     print("verify id token called")
     
     try:
-        id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
+        id_info = id_token.verify_oauth2_token(token, request_adapter, client_id)
         return True, id_info
-    except GoogleAuthError as e:
-        return False, f"Token verification failed: {e}"
+    except GoogleAuthError:
+        try:
+            id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
+            return True, id_info
+        except GoogleAuthError as e:
+            return False, f"Token verification failed: {e}"
 
 def handle_login(id_token):
     ok, data = verify_id_token(id_token)
