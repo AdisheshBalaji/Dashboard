@@ -21,6 +21,7 @@ ios_client_id = os.getenv("IOS_GOOGLE_CLIENT_ID")
 def verify_id_token(token):
     request_adapter = Request()
     print("verify id token called")
+    
     try:
         id_info = id_token.verify_oauth2_token(token, request_adapter, ios_client_id)
         return True, id_info
