@@ -13,6 +13,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
   InAppWebViewController? webViewController;
   late PullToRefreshController pullToRefreshController;
 
+  double progress = 0;
   Uri? currentUrl;
 
   final String userAgent =

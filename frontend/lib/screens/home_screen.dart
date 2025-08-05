@@ -724,12 +724,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                                     25,
                                         isComingSoon: false,
                                         reduceImageSize: true,
-                                        title: 'Face',
-                                        child: 'assets/icons/face-scan.svg',
+                                        title: 'Mess Registration',
+                                        child: 'assets/icons/mess-reg.svg',
                                         onTap: () {
-                                          // widget.isGuest
-                                          //     ? showError()
-                                          context.push('/face_upload');
+                                          context.push('/sva');
                                         },
                                       ),
                                     ),

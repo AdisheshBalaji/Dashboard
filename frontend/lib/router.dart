@@ -18,6 +18,7 @@ import 'package:dashbaord/screens/lost_and_found_add_item_screen.dart';
 import 'package:dashbaord/screens/lost_and_found_item_screen.dart';
 import 'package:dashbaord/screens/lost_and_found_screen.dart';
 import 'package:dashbaord/screens/mess_menu_screen.dart';
+import 'package:dashbaord/screens/mess_registration_screen.dart';
 import 'package:dashbaord/screens/profile_screen.dart';
 import 'package:dashbaord/screens/merch_shop_screen.dart';
 import 'package:dashbaord/screens/merch_orders_screen.dart';
@@ -459,6 +460,24 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: const CommunityScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/sva',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: const MessRegistrationScreen(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(
