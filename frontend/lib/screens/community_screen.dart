@@ -1,6 +1,6 @@
 import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -10,20 +10,11 @@ class CommunityScreen extends StatefulWidget {
 }
 
 class _CommunityScreenState extends State<CommunityScreen> {
-  late final WebViewController controller;
+  InAppWebViewController? webViewController;
 
   final String userAgent =
-      "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) "
+      "Mozilla/5.0 (Linux; Android 11.0; IITH Dashboard Build/MRA58N) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Mobile Safari/537.36";
-
-  @override
-  void initState() {
-    super.initState();
-    controller = WebViewController()
-      ..setUserAgent(userAgent)
-      ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..loadRequest(Uri.parse("https://discourse.iith.ac.in"));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +22,18 @@ class _CommunityScreenState extends State<CommunityScreen> {
       appBar: CustomAppBar(
         title: 'IITH Community',
       ),
-      body: WebViewWidget(controller: controller),
+      body: InAppWebView(
+        initialUrlRequest: URLRequest(
+          url: WebUri("https://discourse.iith.ac.in"),
+        ),
+        initialSettings: InAppWebViewSettings(
+          javaScriptEnabled: true,
+          userAgent: userAgent,
+        ),
+        onWebViewCreated: (controller) {
+          webViewController = controller;
+        },
+      ),
     );
   }
 }
