@@ -1,3 +1,4 @@
+import 'package:dashbaord/constants/enums/schedule_color_palette.dart';
 import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
@@ -75,7 +76,8 @@ class _DayViewScreenState extends State<DayViewScreen> {
 
           events.add(CalendarEventData(
             date: date,
-            title: lecture.courseCode,
+            title:
+                "${lecture.courseCode}${(widget.timetable!.courses[lecture.courseCode]!["classroom"] ?? "").toString().isNotEmpty ? " (${widget.timetable!.courses[lecture.courseCode]!["classroom"]})" : ""}",
             description:
                 widget.timetable!.courses[lecture.courseCode]!["title"],
             startTime: startTime,
@@ -145,7 +147,7 @@ class _DayViewScreenState extends State<DayViewScreen> {
           child: DayView(
             key: key,
             controller: EventController()..addAll(events),
-            backgroundColor: Theme.of(context).canvasColor,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             heightPerMinute: 1,
             showVerticalLine: false,
             initialDay: currentDate,
@@ -179,9 +181,9 @@ class _DayViewScreenState extends State<DayViewScreen> {
                 padding: endTime.difference(startTime) > Duration(minutes: 40)
                     ? EdgeInsets.all(8)
                     : EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                height: 80, // Set your desired height here
+                height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.blueAccent,
+                  color: getColorForTitle(events[0].description ?? ""),
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: [
                     BoxShadow(

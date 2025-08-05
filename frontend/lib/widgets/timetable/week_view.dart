@@ -1,4 +1,5 @@
 import 'package:calendar_view/calendar_view.dart';
+import 'package:dashbaord/constants/enums/schedule_color_palette.dart';
 import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
@@ -10,8 +11,11 @@ class WeekViewScreen extends StatefulWidget {
   final BuildContext context;
   final Timetable? timetable;
 
-  const WeekViewScreen(
-      {super.key, required this.context, required this.timetable});
+  const WeekViewScreen({
+    super.key,
+    required this.context,
+    required this.timetable,
+  });
 
   @override
   State<WeekViewScreen> createState() => _WeekViewScreenState();
@@ -21,7 +25,8 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
   final weekkey = GlobalKey<WeekViewState>();
 
   List<CalendarEventData> convertTimetableToCalendarEvents(
-      List<Lecture> lectures) {
+    List<Lecture> lectures,
+  ) {
     final now = DateTime.now();
     final events = <CalendarEventData>[];
 
@@ -48,31 +53,41 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
             date.month,
             date.day,
             TimeOfDay.fromDateTime(
-                    DateFormat('hh:mm a').parse(lecture.startTime))
-                .hour,
+              DateFormat('hh:mm a').parse(lecture.startTime),
+            ).hour,
             TimeOfDay.fromDateTime(
-                    DateFormat('hh:mm a').parse(lecture.startTime))
-                .minute,
+              DateFormat('hh:mm a').parse(lecture.startTime),
+            ).minute,
           );
 
           DateTime endTime = DateTime(
             date.year,
             date.month,
             date.day,
-            TimeOfDay.fromDateTime(DateFormat('hh:mm a').parse(lecture.endTime))
-                .hour,
-            TimeOfDay.fromDateTime(DateFormat('hh:mm a').parse(lecture.endTime))
-                .minute,
+            TimeOfDay.fromDateTime(
+              DateFormat('hh:mm a').parse(lecture.endTime),
+            ).hour,
+            TimeOfDay.fromDateTime(
+              DateFormat('hh:mm a').parse(lecture.endTime),
+            ).minute,
           );
 
-          events.add(CalendarEventData(
-            date: date, // Optional, based on your requirements
-            title: lecture.courseCode,
-            description:
-                widget.timetable!.courses[lecture.courseCode]!["title"],
-            startTime: startTime,
-            endTime: endTime,
-          ));
+          events.add(
+            CalendarEventData(
+              date: date,
+              title: (widget.timetable!.courses[lecture.courseCode]!["title"] ??
+                      "")
+                  .split(' ')
+                  .map((word) => word.toLowerCase() == 'and'
+                      ? '&'
+                      : (word.isNotEmpty ? word[0] : ''))
+                  .join(),
+              description:
+                  widget.timetable!.courses[lecture.courseCode]!["classroom"],
+              startTime: startTime,
+              endTime: endTime,
+            ),
+          );
         }
       }
     }
@@ -84,8 +99,9 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final List<CalendarEventData> events =
-        convertTimetableToCalendarEvents(widget.timetable!.slots);
+    final List<CalendarEventData> events = convertTimetableToCalendarEvents(
+      widget.timetable!.slots,
+    );
 
     return WeekView(
       key: weekkey,
@@ -93,7 +109,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
       startDay: WeekDays.sunday,
       keepScrollOffset: true,
       scrollOffset: 450,
-      backgroundColor: Theme.of(context).canvasColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       headerStringBuilder: (date, {secondaryDate}) {
         String startDate = DateFormat('d MMM').format(date);
         String endDate = DateFormat('d MMM').format(secondaryDate ?? date);
@@ -109,10 +125,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
         decoration: BoxDecoration(
           color: Colors.grey.shade900,
           border: Border(
-            bottom: BorderSide(
-              color: Colors.grey.shade800,
-              width: 1,
-            ),
+            bottom: BorderSide(color: Colors.grey.shade800, width: 1),
           ),
         ),
       ),
@@ -126,10 +139,11 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
         bool isCurrentWeek = (DateTime.now().isBefore(endDate) &&
             DateTime.now().isAfter(startDate));
         return WeekPageHeader(
-            formattedStartDate: formattedStartDate,
-            formattedEndDate: formattedEndDate,
-            isCurrentWeek: isCurrentWeek,
-            weekkey: weekkey);
+          formattedStartDate: formattedStartDate,
+          formattedEndDate: formattedEndDate,
+          isCurrentWeek: isCurrentWeek,
+          weekkey: weekkey,
+        );
       },
       timeLineBuilder: (date) {
         return Container(
@@ -148,7 +162,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
           width: rect.width,
           height: rect.height,
           decoration: BoxDecoration(
-            color: Colors.blueAccent,
+            color: getColorForTitle(events[0].title),
             borderRadius: BorderRadius.circular(8),
             boxShadow: [
               BoxShadow(
@@ -171,14 +185,24 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+              Text(
+                events[0].description ?? "",
+                maxLines: 2,
+                style: const TextStyle(
+                  fontSize: 10,
+                  overflow: TextOverflow.ellipsis,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
           ),
         );
       },
       onEventTap: (event, date) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(date.toIso8601String()),
-        ));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(date.toIso8601String())));
       },
     );
   }
@@ -233,7 +257,6 @@ class WeekPageHeader extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: () {
-                  debugPrint("CLICKED PREVIOUS");
                   weekkey.currentState?.animateToWeek(
                     weekkey.currentState!.currentDate.subtract(
                       Duration(days: 7),
@@ -250,9 +273,7 @@ class WeekPageHeader extends StatelessWidget {
                 onPressed: () {
                   debugPrint("CLICKED NEXT ${weekkey.currentState}");
                   weekkey.currentState?.animateToWeek(
-                    weekkey.currentState!.currentDate.add(
-                      Duration(days: 7),
-                    ),
+                    weekkey.currentState!.currentDate.add(Duration(days: 7)),
                   );
                 },
                 icon: Icon(

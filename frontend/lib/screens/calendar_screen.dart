@@ -16,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:share_plus/share_plus.dart';
@@ -190,8 +189,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   .toList(),
               onPressed: (int index) {
                 setState(() {
-                  selectedViewType =
-                      viewTypeList[index]; // Update the selected view type
+                  selectedViewType = viewTypeList[index];
                 });
               },
               borderRadius: BorderRadius.circular(10),
