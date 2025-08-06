@@ -69,6 +69,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
   bool noSlotsSelected = false;
 
   String courseCode = '';
+  List<String> segments = ['1-2', '1-4', '1-6', '3-4', '3-6', '5-6'];
 
   void _coursePicker() {
     showModalBottomSheet(
@@ -275,13 +276,46 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
               isNotFilled
                   ? Text("Please fill in both fields",
                       style: TextStyle(
                         color: context.customColors.customAccentColor,
                       ))
                   : SizedBox(),
+              const SizedBox(height: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Segment",
+                    style: GoogleFonts.inter(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  Container(
+                    width: 100,
+                    height: 80,
+                    child: CupertinoPicker(
+                      itemExtent: 50.0,
+                      onSelectedItemChanged: (int index) {
+                        setState(() {
+                          selectedSlot = segments[index];
+                        });
+                      },
+                      children: segments
+                          .map((segment) => Center(
+                                child: Text(
+                                  segment,
+                                  style: const TextStyle(fontSize: 18),
+                                ),
+                              ))
+                          .toList(),
+                    ),
+                  )
+                ],
+              ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -393,8 +427,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                         );
                       },
                     ),
-              const SizedBox(height: 6),
-              const SizedBox(height: 6),
+              const SizedBox(height: 12),
               Center(
                 child: ElevatedButton(
                   onPressed: () {
