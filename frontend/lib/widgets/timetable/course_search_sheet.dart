@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_search_model.dart';
 import 'package:dashbaord/services/api_service.dart';
@@ -18,6 +20,7 @@ class _CourseSearchBottomSheetState extends State<CourseSearchBottomSheet> {
   final FocusNode _focusNode = FocusNode();
   List<CourseModel> foundCourses = [];
   CourseModel? selectedCourse;
+  Timer? _debounce;
 
   bool isSearching = false;
 
@@ -46,24 +49,25 @@ class _CourseSearchBottomSheetState extends State<CourseSearchBottomSheet> {
   }
 
   Future<void> _searchCourses(String query) async {
-    setState(() {
-      isSearching = true;
-      foundCourses.clear();
-    });
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        isSearching = true;
+        foundCourses.clear();
+      });
 
-    setState(() {
-      foundCourses = allCourses
+      final results = allCourses
           .where((course) =>
               course.title.toLowerCase().contains(query.toLowerCase()))
           .toList();
-      isSearching = false;
+
+      setState(() {
+        foundCourses = results;
+        isSearching = false;
+      });
     });
   }
-
-  void _selectCourse(CourseModel course) {
-    Navigator.pop(context);
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Padding(
