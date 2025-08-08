@@ -11,7 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AddLectureBottomSheet extends StatefulWidget {
   final Timetable? timetable;
-  final Function(String, String, List<Lecture>, String?, String?)?
+  final Function(String, String, List<Lecture>, String?, String?, String?)?
       onLectureAdded;
 
   const AddLectureBottomSheet(
@@ -65,11 +65,13 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
   TextInputType currentKeyboardType = TextInputType.text;
   final FocusNode _courseCodeFocusNode = FocusNode();
   final FocusNode _courseTitleFocusNode = FocusNode();
+  late FixedExtentScrollController _segmentScrollController;
   bool isNotFilled = false;
   bool noSlotsSelected = false;
 
   String courseCode = '';
   List<String> segments = ['1-2', '1-4', '1-6', '3-4', '3-6', '5-6'];
+  String? segment = '1-2';
 
   void _coursePicker() {
     showModalBottomSheet(
@@ -79,6 +81,7 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
           courseTitleController.text = course.title;
           courseCodeController.text = course.courseCode;
           classRoomController.text = course.classroom ?? '';
+          changeSegment(course.segment ?? "1-2");
           setState(() {
             if (course.slot != null) {
               slots.addAll(getSlotFromString(course.slot!)!.getLectures());
@@ -103,6 +106,9 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
     super.initState();
     courseCodeController.addListener(_checkFields);
     courseTitleController.addListener(_checkFields);
+    _segmentScrollController = FixedExtentScrollController(
+      initialItem: segments.indexOf(segment ?? "1-2"),
+    );
   }
 
   @override
@@ -117,6 +123,19 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
     Future.delayed(Duration(milliseconds: 10), () {
       _courseCodeFocusNode.requestFocus();
     });
+  }
+
+  void changeSegment(String newSegment) {
+    setState(() {
+      segment = newSegment;
+    });
+
+    final index = segments.indexOf(newSegment);
+    _segmentScrollController.animateToItem(
+      index,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -294,14 +313,15 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: 100,
                     height: 80,
                     child: CupertinoPicker(
+                      scrollController: _segmentScrollController,
                       itemExtent: 50.0,
                       onSelectedItemChanged: (int index) {
                         setState(() {
-                          selectedSlot = segments[index];
+                          segment = segments[index];
                         });
                       },
                       children: segments
@@ -468,14 +488,16 @@ class _AddLectureBottomSheetState extends State<AddLectureBottomSheet> {
                             );
                           }).toList(),
                           classRoomController.text,
-                          selectedSlot);
+                          selectedSlot,
+                          ""
+                          // TODO: Add Segment Info
+                          );
                     }
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
                       backgroundColor: context.customColors.customAccentColor,
-                      foregroundColor: Colors.white // Button color
-                      ),
+                      foregroundColor: Colors.white),
                   child: const Text(
                     "Add Course",
                     style: TextStyle(fontSize: 18),

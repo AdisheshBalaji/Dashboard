@@ -3,6 +3,7 @@ import 'package:dashbaord/constants/enums/schedule_color_palette.dart';
 import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
+import 'package:dashbaord/widgets/timetable/event_details_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
@@ -76,12 +77,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
             CalendarEventData(
               date: date,
               title: (widget.timetable!.courses[lecture.courseCode]!["title"] ??
-                      "")
-                  .split(' ')
-                  .map((word) => word.toLowerCase() == 'and'
-                      ? '&'
-                      : (word.isNotEmpty ? word[0] : ''))
-                  .join(),
+                  ""),
               description:
                   widget.timetable!.courses[lecture.courseCode]!["classroom"],
               startTime: startTime,
@@ -163,7 +159,7 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
           height: rect.height,
           decoration: BoxDecoration(
             color: getColorForTitle(events[0].title),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(4),
             boxShadow: [
               BoxShadow(
                 color: Colors.black26,
@@ -176,7 +172,13 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                events[0].title,
+                events[0]
+                    .title
+                    .split(' ')
+                    .map((word) => word.toLowerCase() == 'and'
+                        ? '&'
+                        : (word.isNotEmpty ? word[0] : ''))
+                    .join(), //
                 maxLines: 2,
                 style: const TextStyle(
                   fontSize: 12,
@@ -199,10 +201,16 @@ class _WeekViewScreenState extends State<WeekViewScreen> {
           ),
         );
       },
-      onEventTap: (event, date) {
-        ScaffoldMessenger.of(
+      onEventTap: (events, date) {
+        final event = events.first;
+        EventDetailsBottomSheet.show(
           context,
-        ).showSnackBar(SnackBar(content: Text(date.toIso8601String())));
+          title: event.title,
+          date: event.date,
+          startTime: event.startTime ?? DateTime.now(),
+          endTime: event.endTime ?? DateTime.now(),
+          description: event.description,
+        );
       },
     );
   }
@@ -225,7 +233,7 @@ class WeekPageHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

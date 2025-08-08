@@ -2,6 +2,7 @@ import 'package:dashbaord/constants/enums/schedule_color_palette.dart';
 import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/models/lecture_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
+import 'package:dashbaord/widgets/timetable/event_details_bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:calendar_view/calendar_view.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -220,8 +221,16 @@ class _DayViewScreenState extends State<DayViewScreen> {
                 ),
               );
             },
-            onEventTap: (event, date) {
-              debugPrint(Theme.of(context).canvasColor.toString());
+            onEventTap: (events, date) {
+              final event = events.first;
+              EventDetailsBottomSheet.show(
+                context,
+                title: event.title,
+                date: event.date,
+                startTime: event.startTime ?? DateTime.now(),
+                endTime: event.endTime ?? DateTime.now(),
+                description: event.description,
+              );
             },
           ),
         ),

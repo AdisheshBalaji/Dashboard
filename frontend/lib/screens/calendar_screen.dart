@@ -272,7 +272,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       builder: (context) {
         return AddLectureBottomSheet(
           timetable: timetable,
-          onLectureAdded: (courseCode, courseName, lectures, classRoom, slot) {
+          onLectureAdded: (courseCode, courseName, lectures, classRoom, slot, segment) {
             setState(() {
               timetable =
                   timetable!.addCourse(courseCode, courseName, lectures);

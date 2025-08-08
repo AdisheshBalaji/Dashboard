@@ -40,6 +40,8 @@ class Timetable {
               'classroom': value['classroom'].toString(),
             if (value.containsKey('slot') && value['slot'] != null)
               'slot': value['slot'].toString(),
+            if (value.containsKey('segment') && value['segment'] != null)
+              'segment': value['segment'].toString(),
           });
         }
         return MapEntry(key, {
@@ -48,6 +50,8 @@ class Timetable {
             'classroom': value['classroom'].toString(),
           if (value.containsKey('slot') && value['slot'] != null)
             'slot': value['slot'].toString(),
+          if (value.containsKey('segment') && value['segment'] != null)
+            'segment': value['segment'].toString(),
         });
       },
     );
@@ -75,6 +79,7 @@ class Timetable {
             'title': value['title'],
             if (value['classroom'] != null) 'classroom': value['classroom'],
             if (value['slot'] != null) 'slot': value['slot'],
+            if (value['segment'] != null) 'segment': value['segment'],
           })),
       'slots': slots.map((lecture) => lecture.toJson()).toList(),
     };
@@ -82,7 +87,7 @@ class Timetable {
 
   Timetable addCourse(
           String courseCode, String courseName, List<Lecture> lectures,
-          {String? classRoom, String? slot}) =>
+          {String? classRoom, String? slot, String? segment}) =>
       Timetable(
         courses: {
           ...courses,
@@ -90,6 +95,7 @@ class Timetable {
             'title': courseName,
             if (classRoom?.isNotEmpty ?? false) 'classroom': classRoom!,
             if (slot?.isNotEmpty ?? false) 'slot': slot!,
+            if (segment?.isNotEmpty ?? false) 'segment': segment!,
           }
         },
         slots: [...slots, ...lectures],
@@ -101,7 +107,6 @@ class Timetable {
 
     for (Lecture lecture in slots) {
       int? dayOfWeek = _dayStringToWeekday(lecture.day);
-      print("TITLE: ${lecture.courseCode} DAY: ${lecture.day}");
       if (dayOfWeek == null) {
         continue;
       }
