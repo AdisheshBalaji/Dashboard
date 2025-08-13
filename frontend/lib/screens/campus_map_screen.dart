@@ -79,7 +79,6 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
     }
   }
 
-
   Future<void> _initGPS() async {
     try {
       final serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -93,7 +92,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
         );
         return;
       }
-  
+
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -108,7 +107,7 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
           return;
         }
       }
-  
+
       if (permission == LocationPermission.deniedForever) {
         _showError(
           "Location permission is permanently denied. Please enable it in app settings.",
@@ -119,11 +118,11 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
         );
         return;
       }
-  
+
       currentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
-  
+
       debugPrint('Current Location: ${currentPosition.toString()}');
       _updateGPSMarker();
     } catch (e, stack) {
@@ -131,50 +130,50 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
       _showError("Failed to retrieve location. Please try again.");
     }
   }
-  
+
   void _showError(String message,
-        {bool showSettingsButton = false, VoidCallback? onSettingsPressed}) {
-      ScaffoldMessenger.of(context).clearSnackBars();
-    
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Theme.of(context).colorScheme.errorContainer,
-          content: Row(
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: Theme.of(context).colorScheme.error,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  message,
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onErrorContainer,
-                    fontSize: 14,
-                  ),
+      {bool showSettingsButton = false, VoidCallback? onSettingsPressed}) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        backgroundColor: Theme.of(context).colorScheme.errorContainer,
+        content: Row(
+          children: [
+            Icon(
+              Icons.error_outline,
+              color: Theme.of(context).colorScheme.error,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onErrorContainer,
+                  fontSize: 14,
                 ),
               ),
-            ],
-          ),
-          action: showSettingsButton
-              ? SnackBarAction(
-                  label: "Settings",
-                  textColor: Theme.of(context).colorScheme.onErrorContainer,
-                  onPressed: onSettingsPressed ?? () {},
-                )
-              : null,
-          duration: const Duration(seconds: 5),
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+            ),
+          ],
         ),
-      );
-    }
-     
+        action: showSettingsButton
+            ? SnackBarAction(
+                label: "Settings",
+                textColor: Theme.of(context).colorScheme.onErrorContainer,
+                onPressed: onSettingsPressed ?? () {},
+              )
+            : null,
+        duration: const Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
   void _updateGPSMarker() {
     if (currentPosition == null) return;
     // For debugging (Improving Accuracy)
@@ -367,7 +366,8 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
                                 const aspectRatio = 848 / 1405;
                                 double renderWidth = constraints.maxWidth;
                                 double renderHeight = renderWidth / aspectRatio;
-                                debugPrint("RENDERED $renderWidth x $renderHeight");
+                                debugPrint(
+                                    "RENDERED $renderWidth x $renderHeight");
                                 if (renderHeight > constraints.maxHeight) {
                                   renderHeight = constraints.maxHeight;
                                   renderWidth = renderHeight * aspectRatio;
@@ -412,10 +412,14 @@ class _CampusMapScreenState extends State<CampusMapScreen> {
                             ),
                           if (highlightedBuilding != null)
                             Positioned(
-                              left: highlightedBuilding!.left +
+                              left: (highlightedBuilding!.left /
+                                      360 *
+                                      (mapWidth ?? 360) +
                                   highlightedBuilding!.width / 2 -
-                                  (markerWidth / 10),
-                              top: highlightedBuilding!.top +
+                                  (markerWidth / 10)),
+                              top: (highlightedBuilding!.top /
+                                          596.4622641509434) *
+                                      (mapHeight ?? 596.4622641509434) +
                                   highlightedBuilding!.height / 2 -
                                   (markerHeight / 2),
                               child: GestureDetector(
