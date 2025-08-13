@@ -78,13 +78,22 @@ class CityBusSchedule {
 
   factory CityBusSchedule.fromJson(Map<String, dynamic> json) {
     Map<String, int> fromIITH = {};
+    Map<String, int> toIITH = {};
+
     json['bus']['iith-ptc'].forEach((item) {
-      fromIITH[item] = 0; // Bus values should be 0
+      fromIITH[item] = 0;
     });
 
-    Map<String, int> toIITH = {};
     json['bus']['ptc-iith'].forEach((item) {
-      toIITH[item] = 0; // Bus values should be 0
+      toIITH[item] = 0;
+    });
+
+    json['bus']['iith-miya'].forEach((item) {
+      fromIITH[item] = 1;
+    });
+
+    json['bus']['miya-iith'].forEach((item) {
+      toIITH[item] = 1;
     });
 
     return CityBusSchedule(
@@ -94,25 +103,33 @@ class CityBusSchedule {
   }
 
   Map<String, dynamic> toJson() {
-    List<String> busFromIITH = [];
-    List<String> busToIITH = [];
+    List<String> patancheruFromIITH = [];
+    List<String> patancheruToIITH = [];
+    List<String> miyapurFromIITH = [];
+    List<String> miyapurToIITH = [];
 
     fromIITH.forEach((key, value) {
       if (value == 0) {
-        busFromIITH.add(key);
+        patancheruFromIITH.add(key);
+      } else {
+        miyapurFromIITH.add(key);
       }
     });
 
     toIITH.forEach((key, value) {
       if (value == 0) {
-        busToIITH.add(key);
+        patancheruToIITH.add(key);
+      } else {
+        miyapurToIITH.add(key);
       }
     });
 
     return {
       'bus': {
-        'iith-ptc': busFromIITH,
-        'ptc-iith': busToIITH,
+        'iith-ptc': patancheruFromIITH,
+        'ptc-iith': patancheruToIITH,
+        'iith-miya': miyapurFromIITH,
+        'miya-iith': miyapurToIITH,
       }
     };
   }

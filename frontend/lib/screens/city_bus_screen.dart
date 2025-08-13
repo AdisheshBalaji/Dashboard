@@ -601,6 +601,60 @@ class _CityBusScreenState extends State<CityBusScreen>
     );
   }
 
+  Map<String, int> getCurrentTimings() {
+    if (busSchedule == null) return {};
+    
+    if (startingPoint == "IITH") {
+      if (destination == "Patancheru") {
+        return Map.fromEntries(
+          busSchedule!.fromIITH.entries.where((entry) => entry.value == 0)
+        );
+      } else if (destination == "Miyapur") {
+        return Map.fromEntries(
+          busSchedule!.fromIITH.entries.where((entry) => entry.value == 1)
+        );
+      }
+    } else {
+      if (startingPoint == "Patancheru") {
+        return Map.fromEntries(
+          busSchedule!.toIITH.entries.where((entry) => entry.value == 0)
+        );
+      } else if (startingPoint == "Miyapur") {
+        return Map.fromEntries(
+          busSchedule!.toIITH.entries.where((entry) => entry.value == 1)
+        );
+      }
+    }
+    return {};
+  }
+
+  Map<String, int> getReverseTimings() {
+    if (busSchedule == null) return {};
+    
+    if (startingPoint == "IITH") {
+      if (destination == "Patancheru") {
+        return Map.fromEntries(
+          busSchedule!.toIITH.entries.where((entry) => entry.value == 0)
+        );
+      } else if (destination == "Miyapur") {
+        return Map.fromEntries(
+          busSchedule!.toIITH.entries.where((entry) => entry.value == 1)
+        );
+      }
+    } else {
+      if (startingPoint == "Patancheru") {
+        return Map.fromEntries(
+          busSchedule!.fromIITH.entries.where((entry) => entry.value == 0)
+        );
+      } else if (startingPoint == "Miyapur") {
+        return Map.fromEntries(
+          busSchedule!.fromIITH.entries.where((entry) => entry.value == 1)
+        );
+      }
+    }
+    return {};
+  }
+
   Column schedule() {
     return Column(
       children: [
@@ -612,7 +666,7 @@ class _CityBusScreenState extends State<CityBusScreen>
                 child: BusTimingList(
                   from: startingPoint,
                   destination: destination,
-                  timings: toIITH ?? {},
+                  timings: getCurrentTimings(),
                 ),
               ),
               const SizedBox(width: 4.0),
@@ -620,14 +674,21 @@ class _CityBusScreenState extends State<CityBusScreen>
                 child: BusTimingList(
                   from: destination,
                   destination: startingPoint,
-                  timings: fromIITH ?? {},
+                  timings: getReverseTimings(),
                 ),
               ),
             ],
           ),
         ),
-        // _buildNoteWidget(),
+        _buildNoteWidget(),
       ],
+    );
+  }
+
+  Widget _buildNoteWidget() {
+    return Text(
+      '*Miyapur bus is not available on weekends and Institute Holidays',
+      style: GoogleFonts.inter(fontSize: 14),
     );
   }
 }
