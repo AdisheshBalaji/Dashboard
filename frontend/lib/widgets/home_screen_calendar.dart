@@ -191,79 +191,90 @@ class _HomeScreenScheduleState extends State<HomeScreenSchedule> {
 Container lectureItem(
     Lecture lecture, Timetable? timetable, BuildContext context) {
   return Container(
-    margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    padding: EdgeInsets.all(8),
+    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
     decoration: BoxDecoration(
       color: Theme.of(context).cardColor,
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(10),
       boxShadow: [
         BoxShadow(
-          color: const Color(0xff000000).withOpacity(0.25),
-          offset: const Offset(
-            0,
-            1,
-          ),
-          blurRadius: 1.0,
-          spreadRadius: 0.0,
+          color: Theme.of(context).shadowColor.withOpacity(0.06),
+          offset: const Offset(0, 1),
+          blurRadius: 6,
+          spreadRadius: 0,
         ),
       ],
     ),
-    child: Row(
-      children: [
-        Text(
-          lecture.startTime,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).textTheme.bodyLarge?.color,
-          ),
-        ),
-        SizedBox(width: 8),
-        Container(
-          height: 50,
-          width: 2,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.all(
-              Radius.circular(20),
+    child: Padding(
+      padding: const EdgeInsets.all(10),
+      child: Row(
+        children: [
+          IntrinsicWidth(
+            child: Row(
+              children: [
+                Container(
+                  width: 70,
+                  alignment: Alignment.centerRight,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      lecture.startTime,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodyLarge?.color,
+                      ),
+                    ),
+                  )
+                ),
+                SizedBox(width: 6),
+                Container(
+                  height: 30,
+                  width: 2,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.all(Radius.circular(20)),
+                    color: context.customColors.customAccentColor,
+                  ),
+                ),
+              ],
             ),
-            color: context.customColors.customAccentColor,
           ),
-        ),
-        SizedBox(width: 8),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              NormalText(
-                text: lecture.classRoom != null && lecture.classRoom != 'null'
-                    ? lecture.courseCode
-                    : lecture.courseCode,
-                size: 12,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-              NormalText(
-                text: timetable!.courses[lecture.courseCode]?['title'] ??
-                    'Unknown Course',
-                size: 18,
-                limit: 1,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-              Row(
-                children: [
-                  Icon(Icons.location_on,size: 18,color: Colors.grey,),
-                  NormalText(
-                text: lecture.classRoom != null && lecture.classRoom != 'null'
-                    ? '${lecture.classRoom}'
-                    : lecture.courseCode,
-                size: 12,
-                color: Theme.of(context).textTheme.bodyMedium?.color,
-              ),
-                ],
-              )
-            ],
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  lecture.classRoom != null && lecture.classRoom != 'null'
+                      ? '${lecture.courseCode} • ${lecture.classRoom}'
+                      : lecture.courseCode,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context)
+                        .textTheme
+                        .bodyMedium
+                        ?.color
+                        ?.withOpacity(0.6),
+                  ),
+                ),
+                const SizedBox(height: 1),
+                Text(
+                  timetable?.courses[lecture.courseCode]?['title'] ??
+                      'Unknown Course',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                    height: 1.2,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }
