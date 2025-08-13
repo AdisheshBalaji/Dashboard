@@ -20,8 +20,6 @@ class _CityBusScreenState extends State<CityBusScreen>
   final TextEditingController transactionAmountController =
       TextEditingController();
 
-  Map<String, int>? toIITH;
-  Map<String, int>? fromIITH;
 
   bool _isLoading = false;
 
@@ -59,14 +57,10 @@ class _CityBusScreenState extends State<CityBusScreen>
 
       setState(() {
         busSchedule = res;
-        toIITH = busSchedule?.toIITH ?? {};
-        fromIITH = busSchedule?.fromIITH ?? {};
       });
     } else {
       setState(() {
         busSchedule = response;
-        toIITH = busSchedule?.toIITH ?? {};
-        fromIITH = busSchedule?.fromIITH ?? {};
       });
     }
   }
