@@ -72,9 +72,6 @@ class HomeScreenMessMenu extends StatelessWidget {
           return;
         }
         context.push('/mess', extra: {'messMenu': messMenu!, 'week': week});
-        // Navigator.of(context).push(
-        //   CustomPageRoute(child: MessMenuScreen(messMenu: messMenu!)),
-        // );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -82,8 +79,8 @@ class HomeScreenMessMenu extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: context.customColors.customShadowColor, // Shadow color
-              offset: const Offset(0, 4), // Offset in the x, y direction
+              color: context.customColors.customShadowColor,
+              offset: const Offset(0, 4),
               blurRadius: 10.0,
               spreadRadius: 0.0,
             ),

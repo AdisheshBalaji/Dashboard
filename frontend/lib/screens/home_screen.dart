@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dashbaord/extensions.dart';
 import 'package:dashbaord/main.dart';
 import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/time_table_model.dart';
@@ -583,10 +584,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           const SizedBox(height: 15),
                           Container(
                             decoration: BoxDecoration(
-                              color: Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.grey[900] // Dark mode background
-                                  : Colors.grey[200], // Light mode background
+                              color: context.customColors.customContainerColor,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             padding: EdgeInsets.fromLTRB(12.0, 8.0, 1.0, 8.0),
@@ -701,7 +699,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
-                                          context.push('/city_bus');
+                                          context.push('/map');
                                         },
                                       ),
                                     ),
@@ -801,6 +799,32 @@ class _HomeScreenState extends State<HomeScreen> {
                                           // widget.isGuest
                                           //     ? showError()
                                           context.push("/community");
+                                        },
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      width: MediaQuery.of(context).size.width >
+                                              450
+                                          ? 200
+                                          : MediaQuery.of(context).size.width /
+                                                  3 -
+                                              28,
+                                      child: HomeScreenCardSmall(
+                                        width:
+                                            MediaQuery.of(context).size.width >
+                                                    450
+                                                ? 200
+                                                : MediaQuery.of(context)
+                                                            .size
+                                                            .width /
+                                                        2 -
+                                                    25,
+                                        isComingSoon: false,
+                                        reduceImageSize: true,
+                                        title: 'Campus Map',
+                                        child: 'assets/icons/campus-map.svg',
+                                        onTap: () {
+                                          context.push("/map");
                                         },
                                       ),
                                     ),

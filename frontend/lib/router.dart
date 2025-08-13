@@ -4,6 +4,7 @@ import 'package:dashbaord/models/mess_menu_model.dart';
 import 'package:dashbaord/models/user_model.dart';
 import 'package:dashbaord/screens/announcement_full_screen.dart';
 import 'package:dashbaord/screens/announcement_screen.dart';
+import 'package:dashbaord/screens/campus_map_screen.dart';
 import 'package:dashbaord/screens/city_bus_screen.dart';
 import 'package:dashbaord/screens/bus_timings_screen.dart';
 import 'package:dashbaord/screens/cab_add_screen.dart';
@@ -132,6 +133,24 @@ class AppRouter {
           return CustomTransitionPage(
             key: state.pageKey,
             child: CityBusScreen(),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(animation),
+                child: child,
+              );
+            },
+          );
+        },
+      ),
+      GoRoute(
+        path: '/map',
+        pageBuilder: (context, state) {
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: CampusMapScreen(),
             transitionsBuilder: (context, animation, secondaryAnimation, child) {
               return SlideTransition(
                 position: Tween<Offset>(

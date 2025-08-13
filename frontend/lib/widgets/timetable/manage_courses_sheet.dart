@@ -83,7 +83,7 @@ class _ManageCoursesBottomSheetState extends State<ManageCoursesBottomSheet> {
     return Material(
       elevation: 12,
       color: Theme.of(context).canvasColor,
-      borderRadius: BorderRadius.circular(25), // Add border radius here
+      borderRadius: BorderRadius.circular(25),
       shadowColor: Colors.white.withOpacity(0.3),
       child: SingleChildScrollView(
         physics: NeverScrollableScrollPhysics(),
@@ -127,7 +127,6 @@ class _ManageCoursesBottomSheetState extends State<ManageCoursesBottomSheet> {
               Stack(
                 children: [
                   ConstrainedBox(
-                    // limit the bottom sheet to 45% of the screen height
                     constraints: BoxConstraints(
                       maxHeight: screenHeight * 0.45,
                     ),
@@ -260,7 +259,7 @@ class _ManageCoursesBottomSheetState extends State<ManageCoursesBottomSheet> {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: context.customColors.customAccentColor,
-                    foregroundColor: Colors.white, // Button color
+                    foregroundColor: Colors.white,
                   ),
                   icon: Icon(
                     Icons.check,
