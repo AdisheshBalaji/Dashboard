@@ -681,7 +681,7 @@ class _CityBusScreenState extends State<CityBusScreen>
 
   Widget _buildNoteWidget() {
     return Text(
-      '*Miyapur bus is not available on weekends and Institute Holidays',
+      '*Bus not available on weekends and Institute Holidays',
       style: GoogleFonts.inter(fontSize: 14),
     );
   }
