@@ -699,7 +699,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         onTap: () {
                                           // widget.isGuest
                                           //     ? showError()
-                                          context.push('/map');
+                                          context.push('/city_bus');
                                         },
                                       ),
                                     ),
