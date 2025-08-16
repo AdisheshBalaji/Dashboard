@@ -155,7 +155,7 @@ class NotificationRequest(BaseModel):
 
 @app.post("/send-notifications")
 async def send_notifications(payload: NotificationRequest, user_id: int = Depends(get_user_id)):
-    if user_id not in {1, 41, 1695}:
+    if user_id not in {1, 41, 2430}:
         raise HTTPException(status_code=403, detail="Forbidden")
     if user_id == 1695:
         test = True
