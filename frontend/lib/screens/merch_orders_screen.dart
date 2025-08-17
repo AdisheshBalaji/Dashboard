@@ -1,3 +1,4 @@
+import 'package:dashbaord/services/analytics_service.dart';
 import 'package:dashbaord/widgets/custom_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:dashbaord/models/merch_order_model.dart';
@@ -16,11 +17,13 @@ class _MerchOrdersScreenState extends State<MerchOrdersScreen> {
   List<MerchOrder> _orders = [];
   bool _isLoading = true;
   String? _errorMessage;
+  final analyticsService = FirebaseAnalyticsService();
 
   @override
   void initState() {
     super.initState();
     _loadOrders();
+    analyticsService.logScreenView(screenName: "Bus Schedule Screen");
   }
 
   Future<void> _loadOrders() async {
