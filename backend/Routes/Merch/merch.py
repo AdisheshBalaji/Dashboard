@@ -146,6 +146,18 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
+        if not order.display_name or order.display_name.strip() == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Display name is required and cannot be empty"
+            )
+        
+        if not order.transaction_id or order.transaction_id.strip() == "":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Transaction ID is required and cannot be empty"
+            )
+        
         deadline_query = check_deadline_availability(order.merch_id)
         cursor = conn.cursor()
         cursor.execute(deadline_query)
