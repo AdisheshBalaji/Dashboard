@@ -23,6 +23,10 @@ import 'package:url_launcher/url_launcher.dart';
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
     FlutterLocalNotificationsPlugin();
 
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+}
+
 void main() async {
   await dotenv.load(fileName: ".env");
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,6 +43,9 @@ void main() async {
   clearAllNotifications();
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
+
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
   runApp(const MyApp());
 }
 
@@ -108,10 +115,6 @@ Future<void> _requestNotificationPermissions() async {
   } else {
     debugPrint('Notification permission denied.');
   }
-}
-
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
 }
 
 Future<void> clearAllNotifications() async {
@@ -252,23 +255,6 @@ class _MyAppState extends State<MyApp> {
           : _mode == 1
               ? ThemeMode.light
               : ThemeMode.dark,
-      // navigatorObservers: [_analyticsService.getAnalyticsObserver()],
-      // home: isLoading
-      //     ? SplashScreen(nextPage: Container())
-      //     : isLoggedIn
-      //         ? SplashScreen(
-      //             nextPage: HomeScreen(
-      //               onThemeChanged: handleThemeChange,
-      //               isGuest: false,
-      //             ),
-      //             isLoading: false,
-      //           )
-      //         : SplashScreen(
-      //             isLoading: false,
-      //             nextPage: LoginScreenWrapper(
-      //               onThemeChanged: handleThemeChange,
-      //               timeDilationFactor: 4.0,
-      //             )),
     );
   }
 }

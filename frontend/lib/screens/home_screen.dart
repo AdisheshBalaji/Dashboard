@@ -80,6 +80,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> setUpFirebaseMessaging() async {
+    final settings = await _firebaseMessaging.requestPermission();
+    if (settings.authorizationStatus != AuthorizationStatus.authorized) {
+        debugPrint("Notification permission not granted.");
+        return;
+    }
+       
     String? oldToken = await SharedService().getStoredToken();
     if (kIsWeb) {
       final fcmToken = await FirebaseMessaging.instance
