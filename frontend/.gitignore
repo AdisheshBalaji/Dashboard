@@ -80,6 +80,7 @@ app.*.map.json
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 **/ios/Flutter/**/*
+**/ios/Runner/GoogleService-Info.plist
 
 # Windows
 **/windows/flutter/ephemeral/
