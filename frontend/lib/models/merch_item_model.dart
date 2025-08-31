@@ -12,6 +12,7 @@ class MerchItem {
   final String sizeGuideUrl;
   final List<MerchSize> availableSizes;
   final bool hasSizes;
+  final bool askDisplayName;
 
   MerchItem({
     required this.id,
@@ -27,6 +28,7 @@ class MerchItem {
     required this.sizeGuideUrl,
     required this.availableSizes,
     required this.hasSizes,
+    required this.askDisplayName,
   });
 
   factory MerchItem.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,7 @@ class MerchItem {
       sizeGuideUrl: json['size_guide_url'] ?? '',
       availableSizes: sizesList,
       hasSizes: json['has_sizes'] ?? (sizesList.isNotEmpty),
+      askDisplayName: json['ask_display_name'] ?? true,
     );
   }
 
@@ -83,6 +86,7 @@ class MerchItem {
       'size_guide_url': sizeGuideUrl,
       'available_sizes': availableSizes.map((size) => size.toJson()).toList(),
       'has_sizes': hasSizes,
+      'ask_display_name': askDisplayName,
     };
   }
 }

@@ -4,19 +4,22 @@ import 'package:flutter/material.dart';
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final String label;
+  final String? Function(String?)? validator;
 
   const CustomTextField({
     Key? key,
     required this.controller,
     required this.label,
+    this.validator,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: TextField(
+      child: TextFormField(
         controller: controller,
+        validator: validator,
           cursorColor: context.customColors.customAccentColor,
         decoration: InputDecoration(
           hintText: label,

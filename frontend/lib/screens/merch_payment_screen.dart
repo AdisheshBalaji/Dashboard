@@ -416,12 +416,22 @@ class _MerchPaymentScreenState extends State<MerchPaymentScreen>
                         ),
                       ),
                     ),
-                    _buildSectionHeader(
-                        context, 'Merch Information', Icons.person_outline),
-                    const SizedBox(height: 16),
-                    CustomTextField(
-                        controller: _nameController, label: 'Display Name'),
-                    const SizedBox(height: 24),
+                    if (widget.item.askDisplayName) ...[
+                      _buildSectionHeader(
+                          context, 'Merch Information', Icons.person_outline),
+                      const SizedBox(height: 16),
+                      CustomTextField(
+                          controller: _nameController, 
+                          label: 'Display Name',
+                          validator: (value) {
+                            if (widget.item.askDisplayName && (value == null || value.trim().isEmpty)) {
+                              return 'Display name is required';
+                            }
+                            return null;
+                          },
+                      ),
+                      const SizedBox(height: 24),
+                    ],
                     _buildSectionHeader(
                         context, 'Payment Details', Icons.payment_outlined),
                     const SizedBox(height: 16),
