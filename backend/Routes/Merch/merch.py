@@ -77,6 +77,7 @@ def get_items():
                 "created_at": item[7].isoformat(),
                 "is_oversized": item[8],
                 "size_guide_url": item[9],
+                "ask_display_name": item[10],
                 "available_sizes": sizes,
                 "has_sizes": has_sizes
             })
@@ -129,6 +130,7 @@ def get_item(item_id: int):
             "created_at": item[7].isoformat(),
             "is_oversized": item[8],
             "size_guide_url": item[9],
+            "ask_display_name": item[10],
             "available_sizes": sizes
         }
     except HTTPException:
@@ -146,10 +148,20 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
         
-        if not order.display_name or order.display_name.strip() == "":
+        item_query = get_merch_item(order.merch_id)
+        cursor = conn.cursor()
+        cursor.execute(item_query)
+        item_data = cursor.fetchone()
+        
+        if not item_data:
+            raise HTTPException(status_code=404, detail="Merchandise item not found")
+        
+        ask_display_name = bool(item_data[10])
+        
+        if ask_display_name and (not order.display_name or order.display_name.strip() == ""):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Display name is required and cannot be empty"
+                detail="Display name is required for this merchandise"
             )
         
         if not order.transaction_id or order.transaction_id.strip() == "":
@@ -159,7 +171,6 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
             )
         
         deadline_query = check_deadline_availability(order.merch_id)
-        cursor = conn.cursor()
         cursor.execute(deadline_query)
         is_available = cursor.fetchone()[0]
         
@@ -168,13 +179,6 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Order deadline has passed"
             )
-        
-        item_query = get_merch_item(order.merch_id)
-        cursor.execute(item_query)
-        item_data = cursor.fetchone()
-        
-        if not item_data:
-            raise HTTPException(status_code=404, detail="Merchandise item not found")
         
         oversized_option = bool(item_data[8])
         
@@ -208,9 +212,11 @@ def create_order(order: OrderCreate, user_id: int = Depends(get_user_id)):
         
         chosen_is_oversized = order.is_oversized
         
+        final_display_name = order.display_name if ask_display_name else 'N/A'
+        
         order_query = insert_order_query(
             user_id, order.merch_id, order.size,
-            order.transaction_id, order.display_name, chosen_is_oversized
+            order.transaction_id, final_display_name, chosen_is_oversized
         )
         cursor.execute(order_query)
         order_id = cursor.fetchone()[0]

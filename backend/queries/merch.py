@@ -10,7 +10,7 @@ def get_all_merch_items() -> str:
     query = Query.from_(merch).select(
         merch.id, merch.title, merch.deadline, merch.price,
         merch.image_url, merch.description, merch.upi_id, merch.created_at,
-        merch.is_oversized, merch.size_guide_url
+        merch.is_oversized, merch.size_guide_url, merch.ask_display_name
     ).orderby(merch.id, order=Order.desc)
     return query.get_sql()
 
@@ -35,7 +35,7 @@ def get_merch_item(item_id: int) -> str:
     query = Query.from_(merch).select(
         merch.id, merch.title, merch.deadline, merch.price,
         merch.image_url, merch.description, merch.upi_id, merch.created_at,
-        merch.is_oversized, merch.size_guide_url
+        merch.is_oversized, merch.size_guide_url, merch.ask_display_name
     ).where(merch.id == item_id)
     return query.get_sql()
 
