@@ -17,7 +17,9 @@ def get_user(user_id: int) -> Optional[Dict[str, str]]:
             cursor.execute(query.get_sql(), (user_id,))
             user = cursor.fetchone()
     except Exception as e:
-        conn.rollback()  # IMPORTANT!!!
+        print("Get User Exception", e)
+        if not conn.closed:
+            conn.rollback()  # IMPORTANT!!!
         raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
     
     if user:
